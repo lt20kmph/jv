@@ -1,3 +1,5 @@
 /target
 **.db3
 /static
+/ssl/**.crt
+/ssl/**.key
