@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 {% block title %}John Vittorio{% endblock title %}
 {% block body %}
-<ul>
-  <li class="ribeye-marrow-regular">
+<ul class="concert-one-regular">
+  <li>
     <a hx-get="/home.html" hx-target="#content" hx-push-url="true">Home</a>
   </li>
-  <li class="ribeye-marrow-regular">
+  <li>
     <a hx-get="/news.html" hx-target="#content" hx-push-url="true">News</a>
   </li>
-  <li class="ribeye-marrow-regular">
+  <li>
     <a hx-get="/contact.html" hx-target="#content" hx-push-url="true">Contact</a>
   </li>
-  <li style="float:right" class="ribeye-marrow-regular">
+  <li style="float:right" >
     <a class="active" hx-get="/about.html" hx-target="#content" hx-push-url="true">About</a>
   </li>
 </ul>
 
-<div id="content">
+<div id="content" class="montserrat-body">
   <h1>Welcome to my website</h1>
   <p>Click on the links above to navigate</p>
 </div>
