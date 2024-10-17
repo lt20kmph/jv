@@ -6,6 +6,7 @@ use argon2::{
 use chrono;
 use lazy_static::lazy_static;
 use rocket::form::Form;
+use rocket::fs::TempFile;
 use rocket::fs::{relative, FileServer};
 use rocket::http::{Cookie, CookieJar};
 use rocket::request::{FromRequest, Outcome, Request};
@@ -111,6 +112,13 @@ struct UserSignup {
 struct UserLogin<'f> {
     email: &'f str,
     password: &'f str,
+}
+
+#[derive(FromForm)]
+struct ImgUpload<'f> {
+    file: TempFile<'f>,
+    caption: &'f str,
+    modified_file: TempFile<'f>,
 }
 
 struct SaltedPassword {
@@ -310,6 +318,16 @@ async fn post_login(
     content::RawHtml(index)
 }
 
+#[post("/upload", data = "<img_upload>")]
+async fn img_upload(mut img_upload: Form<ImgUpload<'_>>, jv_db: &JvDbConn) -> std::io::Result<()> {
+    img_upload.file.persist_to("/tmp/test.jpg").await?;
+    img_upload
+        .modified_file
+        .copy_to("./static/test_modified.jpg")
+        .await?;
+    Ok(())
+}
+
 #[get("/css/style.css")]
 async fn get_css() -> content::RawCss<String> {
     let mut context = tera::Context::new();
@@ -318,6 +336,13 @@ async fn get_css() -> content::RawCss<String> {
     }
     let style = TEMPLATES.render("css/style.css", &context).unwrap();
     content::RawCss(style)
+}
+
+#[get("/js/upload.js")]
+async fn get_js() -> content::RawJavaScript<String> {
+    let context = tera::Context::new();
+    let js = TEMPLATES.render("js/upload.js", &context).unwrap();
+    content::RawJavaScript(js)
 }
 
 #[launch]
@@ -331,7 +356,9 @@ fn rocket() -> _ {
                 post_signup,
                 get_login,
                 post_login,
-                get_css
+                get_css,
+                img_upload,
+                get_js
             ],
         )
         .attach(JvDbConn::init())
