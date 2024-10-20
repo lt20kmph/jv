@@ -2,25 +2,37 @@
 
 var c = null;
 
-if (c == null) {
-  c = new Croppie(document.getElementById("croppie"), {
-    enableExif: true,
-    viewport: { width: 100, height: 100 },
-    boundary: { width: 300, height: 300 },
-    showZoomer: false,
-    enableResize: true,
-    enableOrientation: true,
-    mouseWheelZoom: "ctrl",
-  });
-}
-
 var modifiedFile = null;
 
 // Functions
 
+const croppie = () => {
+  if (c == null) {
+    c = new Croppie(document.getElementById("croppie"), {
+      enableExif: true,
+      viewport: { width: 100, height: 100 },
+      boundary: { width: 300, height: 300 },
+      showZoomer: false,
+      enableResize: true,
+      enableOrientation: true,
+      mouseWheelZoom: "ctrl",
+    });
+  }
+  return c;
+};
+
+const uploadFile = () => {
+  const img = event.target.files[0];
+  const url = URL.createObjectURL(img);
+  croppie().bind({
+    url: url,
+    points: [77, 469, 280, 739],
+  });
+};
+
 async function setModifiedFile() {
   if (modifiedFile == null) {
-    const blob = await c.result({
+    const blob = await croppie().result({
       type: "blob",
       format: "jpeg",
       quality: 1,
@@ -29,15 +41,6 @@ async function setModifiedFile() {
       type: "image/jpeg",
     });
   }
-}
-
-function uploadFile(file) {
-  const img = event.target.files[0];
-  const url = URL.createObjectURL(img);
-  c.bind({
-    url: url,
-    points: [77, 469, 280, 739],
-  });
 }
 
 // Event Listeners
