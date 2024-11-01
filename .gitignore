@@ -1,5 +1,6 @@
 /target
 **.db3
+**.sqlite3
 /static
 /ssl/**.crt
 /ssl/**.key
