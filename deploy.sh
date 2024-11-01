@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Deploying..."
-git fetch && git reset --hard origin/master
+git fetch && git reset --hard origin/main
 
 echo "Building..."
 rustup run nightly cargo build --release
