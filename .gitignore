@@ -30,3 +30,6 @@ Cargo.lock
 
 # Config file for rocket
 Rocket.toml
+
+# Env
+.env
