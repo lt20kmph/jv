@@ -14,6 +14,7 @@ pub async fn get(
     let mut context = tera::Context::new();
     let images = queries::get_gallery_images(db, 1).await;
     context.insert("images", &images);
+    context.insert("gallery_id", &1);
     let index = constants::TEMPLATES.render("index.html", &context)?;
     Ok(content::RawHtml(index))
 }

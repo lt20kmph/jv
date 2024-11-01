@@ -41,6 +41,8 @@ async fn create_user_table(db: &Db) -> Result<(), sqlx::Error> {
             role TEXT DEFAULT 'reader',
             password TEXT NOT NULL,
             time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            is_verified BOOLEAN DEFAULT FALSE,
+            verification_uuid TEXT NOT NULL,
             salt TEXT NOT NULL
         )
         "#,
@@ -157,7 +159,7 @@ pub async fn insert_user(
     mut conn: Connection<Db>,
     email: &str,
     password: &str,
-) -> Result<(), errors::AppError> {
+) -> Result<String, errors::AppError> {
     let salted_password = pw_utils::hash_and_salt_password(password);
 
     let salted_password = match salted_password {
@@ -167,18 +169,21 @@ pub async fn insert_user(
         }
     };
 
+    let verification_uuid = Uuid::new_v4().to_string();
+
     sqlx::query(
         r#"
-        INSERT INTO users (email, password, salt) VALUES (?1, ?2, ?3)
+        INSERT INTO users (email, password, salt, verification_uuid) VALUES (?1, ?2, ?3, ?4)
         "#,
     )
     .bind(email)
     .bind(salted_password.password_hash)
     .bind(salted_password.salt.to_string())
+    .bind(&verification_uuid)
     .execute(&mut **conn)
     .await?;
 
-    Ok(())
+    Ok(verification_uuid)
 }
 
 pub async fn verify_password(
@@ -357,4 +362,19 @@ pub async fn get_gallery_images(db: &Db, gallery_id: i64) -> Vec<models::Image> 
     }
 
     images
+}
+
+pub async fn verify_user(db: &Db, verification_uuid: &str) -> Result<String, sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        UPDATE users SET is_verified = TRUE WHERE verification_uuid = ?1 RETURNING email
+        "#,
+    )
+    .bind(verification_uuid)
+    .fetch_one(&db.0)
+    .await?;
+
+    let email: String = row.get(0);
+
+    Ok(email)
 }

@@ -9,6 +9,7 @@ use rocket::get;
 use rocket::http::{Cookie, CookieJar};
 use rocket::post;
 use rocket::response::content;
+use rocket::response::Redirect;
 
 #[get("/login")]
 pub async fn get() -> Result<content::RawHtml<String>, errors::AppError> {
@@ -21,7 +22,7 @@ pub async fn post(
     user_login: Form<UserLogin<'_>>,
     cookies: &CookieJar<'_>,
     jv_db: &Db,
-) -> Result<content::RawHtml<String>, errors::AppError> {
+) -> Result<Redirect, errors::AppError> {
     let is_valid = queries::verify_password(jv_db, user_login.email, user_login.password).await?;
 
     if is_valid {
@@ -33,7 +34,5 @@ pub async fn post(
             message: "Invalid Credentials".to_string(),
         });
     }
-
-    let index = constants::TEMPLATES.render("index.html", &tera::Context::new())?;
-    Ok(content::RawHtml(index))
+    Ok(Redirect::to("/"))
 }

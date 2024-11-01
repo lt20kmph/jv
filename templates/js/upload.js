@@ -10,11 +10,13 @@ const croppie = () => {
   if (c == null) {
     c = new Croppie(document.getElementById("croppie"), {
       enableExif: true,
-      viewport: { width: 100, height: 100 },
-      boundary: { width: 300, height: 300 },
+      viewport: { width: 450, height: 450 },
+      boundary: { width: 450, height: 450 },
       showZoomer: false,
-      enableResize: true,
-      enableOrientation: true,
+      enableResize: false,
+      enableOrientation: false,
+      enforceBoundary: true,
+      customClass: "croppie-container",
       mouseWheelZoom: "ctrl",
     });
   }
@@ -26,7 +28,8 @@ const uploadFile = () => {
   const url = URL.createObjectURL(img);
   croppie().bind({
     url: url,
-    points: [77, 469, 280, 739],
+    points: [0, 0, 450, 450],
+    zoom: 0.1,
   });
 };
 
@@ -36,6 +39,7 @@ async function setModifiedFile() {
       type: "blob",
       format: "jpeg",
       quality: 1,
+      size: { width: 900 },
     });
     modifiedFile = new File([blob], Date.now().toString(), {
       type: "image/jpeg",

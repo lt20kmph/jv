@@ -1,4 +1,5 @@
 use argon2::password_hash;
+use reqwest;
 use rocket::http::ContentType;
 use rocket::http::Status;
 use rocket::response::{self, Responder, Response};
@@ -63,6 +64,15 @@ impl From<io::Error> for AppError {
 
 impl From<tera::Error> for AppError {
     fn from(error: tera::Error) -> Self {
+        AppError {
+            code: 500,
+            message: error.to_string(),
+        }
+    }
+}
+
+impl From<reqwest::Error> for AppError {
+    fn from(error: reqwest::Error) -> Self {
         AppError {
             code: 500,
             message: error.to_string(),
