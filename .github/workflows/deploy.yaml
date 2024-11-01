@@ -9,13 +9,24 @@ jobs:
      name: Build
      runs-on: ubuntu-latest
      steps:
-     - name: executing remote ssh commands using password
-       uses: appleboy/ssh-action@v1.1.0
-       with:
-         host: ${{ secrets.LT20KMPH_HOST }}
-         username: ${{ secrets.LT20KMPH_USER }}
-         key: ${{ secrets.LT20KMPH_KEY }}
-         port: ${{ secrets.LT20KMPH_PORT }}
-         script: |
-           cd /srv/sites/jv
-           ./deploy.sh
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host lt20kmph
+            HostName $SSH_HOST
+            User $SSH_USER
+            Port $SSH_PORT
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.LT20KMPH_USER }}
+          SSH_KEY: ${{ secrets.LT20KMPH_KEY }}
+          SSH_HOST: ${{ secrets.LT20KMPH_HOST }}
+          SSH_PORT: ${{ secrets.LT20KMPH_PORT }}
+
+      - name: Check out the source
+        run: ssh lt20kmph 'cd /srv/sites/jv && ./deploy.sh'
