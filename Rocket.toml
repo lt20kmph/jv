@@ -1,9 +1,0 @@
-[default]
-secret_key = "/0oFHLslWI7hnz/CjrRc1mU9uHbofCohfVOCEP/yN7Q="
-
-[default.tls]
-key = "./ssl/localhost.key"     # Path or bytes to DER-encoded ASN.1 PKCS#1/#8 or SEC1 key.
-certs = "./ssl/localhost.crt" # Path or bytes to DER-encoded X.509 TLS cert chain.
-
-[default.databases]
-db = { url = "./db.sqlite3" }
