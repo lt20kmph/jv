@@ -28,7 +28,7 @@ use log::error;
 use rocket::fairing::{self, AdHoc};
 use rocket::fs::{relative, FileServer};
 use rocket::{launch, routes};
-use rocket::{Build, Rocket};
+use rocket::{Build, Rocket, catchers};
 use rocket_db_pools::Database;
 use routes::css;
 use routes::galleries;
@@ -65,6 +65,7 @@ fn stage() -> AdHoc {
                     login::post,
                     index::get,
                     signup::get,
+                    signup::verify,
                     login::get,
                     css::get,
                     js::get,
@@ -79,5 +80,9 @@ fn rocket() -> _ {
     env_logger::init();
     rocket::build()
         .attach(stage())
+        .register(
+            "/",
+            catchers![catchers::not_authorized],
+        )
         .mount("/", FileServer::from(relative!("static")))
 }

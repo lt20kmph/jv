@@ -6,11 +6,28 @@
   --sugar: {{sugar}};
 }
 
-/* Navbar */
+/* General */
 
 body {
   background-color: var(--sugar);
+  margin: 0;
+  padding: 20px;
 }
+
+.horizontal-container {
+  display: flex; /* Use Flexbox */
+}
+
+.horizontal-container > div { /* Target direct children */
+  flex: 1; /* Allow children to grow equally */
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin: 5px; /* Optional spacing between children */
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+}
+
+/* Navbar */
 
 ul {
   list-style-type: none;
@@ -92,14 +109,8 @@ button:hover {
   opacity:1;
 }
 
-/* Extra styles for the cancel button */
-.cancelbtn {
-  padding: 14px 20px;
-  background-color: var(--black);
-}
-
 /* Float cancel and signup buttons and add an equal width */
-.cancelbtn, .signupbtn {
+.signupbtn {
   float: left;
   width: 50%;
 }
@@ -123,6 +134,41 @@ button:hover {
   .cancelbtn, .signupbtn {
     width: 100%;
   }
+}
+.error {
+  color: red;
+  font-size: 0.875rem;
+}
+
+.success {
+  color: green;
+  font-size: 0.875rem;
+}
+
+.submitbtn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1rem;
+  opacity: 0.6;
+  /* Initially disabled */
+  pointer-events: none;
+  /* Initially disabled */
+}
+
+.submitbtn.enabled {
+  opacity: 1;
+  /* Enabled */
+  pointer-events: auto;
+  /* Enabled */
+}
+
+.submitbtn:hover {
+  background-color: #0056b3;
 }
 
 /* End of login */
@@ -178,3 +224,74 @@ div.gallery-desc {
   clear: both;
   display: table;
 }
+
+
+/* Form */
+
+.upload-form {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.file-input,
+.caption-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+.file-input:focus,
+.caption-input:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+.upload-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.upload-button:hover {
+  background-color: #0056b3;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  margin-top: 10px;
+}
+
+.croppie-container {
+  margin-top: 20px;
+  height: 450px;
+  width: 450px;
+}
+/* End of Form */

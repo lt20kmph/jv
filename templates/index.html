@@ -2,6 +2,7 @@
 {% extends "base.html" %}
 {% block title %}John Vittorio{% endblock title %}
 {% block body %}
+
 <ul class="concert-one-regular">
   <li>
     <a hx-get="/home.html" hx-target="#content">Home</a>
@@ -21,32 +22,8 @@
 </ul>
 
 <div id="content" class="montserrat-body">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" rel="stylesheet">
-  </link>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
-
-  <form hx-encoding='multipart/form-data' hx-post='/galleries/1' hx-target='#gallery' hx-swap='beforeend'
-    id='upload-demo' _='on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100'>
-    <input type='file' name='file' oninput="uploadFile()">
-    <input type='text' name='caption'>
-    <input type='text' name='gallery_id' value='1' style='display:none'>
-    <button>
-      Upload
-    </button>
-    <progress id='progress' value='0' max='100'></progress>
-  </form>
-
-  <div id='croppie'></div>
-
-  <div id='gallery'>
-    {% for image in images %}
-      {{ macros::image_item(path=image.path, caption=image.caption) }}
-    {% else %}
-      <p>Hmm... Nothing here yet...</p>
-    {% endfor %}
-    <div class="clearfix"></div>
-  </div>
-
-  <script src="/js/upload.js"></script>
+  {% include "upload_form.html" %}
+  {% include "gallery.html" %}
 </div>
+
 {% endblock body %}
