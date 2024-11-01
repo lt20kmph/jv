@@ -1,0 +1,297 @@
+:root {
+  --black: {{black}};
+  --brown: {{brown}};
+  --vanilla: {{vanilla}};
+  --blue: {{blue}};
+  --sugar: {{sugar}};
+}
+
+/* General */
+
+body {
+  background-color: var(--sugar);
+  margin: 0;
+  padding: 20px;
+}
+
+.horizontal-container {
+  display: flex; /* Use Flexbox */
+}
+
+.horizontal-container > div { /* Target direct children */
+  flex: 1; /* Allow children to grow equally */
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin: 5px; /* Optional spacing between children */
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+}
+
+/* Navbar */
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--black);
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: var(--vanilla);
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+/* Change the link color to #111 (black) on hover */
+li a:hover {
+  background-color: var(--brown);
+}
+
+.concert-one-regular {
+  font-family: "Concert One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1.5em;
+}
+
+.montserrat-body {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+}
+
+/* End of Navbar */
+
+/* login */
+* {box-sizing: border-box}
+
+/* Full-width input fields */
+  input[type=text], input[type=password] {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  display: inline-block;
+  border: none;
+  background: var(--vanilla);
+}
+
+input[type=text]:focus, input[type=password]:focus {
+  background-color: var(--vanilla);
+  outline: none;
+}
+
+hr {
+  border: 1px solid var(--blue);
+  margin-bottom: 25px;
+}
+
+/* Set a style for all buttons */
+button {
+  background-color: var(--blue);
+  color: var(--vanilla);
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  opacity: 0.9;
+}
+
+button:hover {
+  opacity:1;
+}
+
+/* Float cancel and signup buttons and add an equal width */
+.signupbtn {
+  float: left;
+  width: 50%;
+}
+
+/* Add padding to container elements */
+.container {
+  padding: 16px;
+  background-color: var(--vanilla);
+  width: 50vw;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+/* Change styles for cancel button and signup button on extra small screens */
+@media screen and (max-width: 300px) {
+  .cancelbtn, .signupbtn {
+    width: 100%;
+  }
+}
+.error {
+  color: red;
+  font-size: 0.875rem;
+}
+
+.success {
+  color: green;
+  font-size: 0.875rem;
+}
+
+.submitbtn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1rem;
+  opacity: 0.6;
+  /* Initially disabled */
+  pointer-events: none;
+  /* Initially disabled */
+}
+
+.submitbtn.enabled {
+  opacity: 1;
+  /* Enabled */
+  pointer-events: auto;
+  /* Enabled */
+}
+
+.submitbtn:hover {
+  background-color: #0056b3;
+}
+
+/* End of login */
+
+/ * Gallery */
+
+div.gallery {
+  border: 1px solid #ccc;
+}
+
+div.gallery:hover {
+  border: 1px solid #777;
+}
+
+div.gallery img {
+  width: 100%;
+  height: auto;
+}
+
+div.gallery-desc {
+  padding: 15px;
+  text-align: center;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.gallery-responsive {
+  padding: 0 6px;
+  float: left;
+  width: 24.99999%;
+}
+
+@media only screen and (max-width: 700px) {
+  .gallery-responsive {
+    width: 49.99999%;
+    margin: 6px 0;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .gallery-responsive {
+    width: 100%;
+  }
+}
+
+/* End of Gallery */
+
+/* Clear floats */
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+
+/* Form */
+
+.upload-form {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.file-input,
+.caption-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+.file-input:focus,
+.caption-input:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+.upload-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.upload-button:hover {
+  background-color: #0056b3;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  margin-top: 10px;
+}
+
+.croppie-container {
+  margin-top: 20px;
+  height: 450px;
+  width: 450px;
+}
+/* End of Form */

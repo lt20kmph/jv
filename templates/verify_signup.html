@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <style>
+    p {
+      font-size: 12px;
+    }
+
+    .signature {
+      font-style: italic;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <h2>Hello!</h2>
+    <p>Great news! We have a new user who has signed up. The user's email address is: {{new_user_email}}</p>
+    <p>Please click the link below to allow the user access:</p>
+
+    <a href="{{verification_link}}">Verify Email</a>
+
+    <p>If you do not recognize the email address and don't wish to allow access, please ignore this message.</p>
+
+    <p>Thank you!</p>
+  </div>
+</body>
+
+</html>

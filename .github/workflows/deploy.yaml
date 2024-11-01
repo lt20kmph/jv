@@ -1,0 +1,21 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+     name: Build
+     runs-on: ubuntu-latest
+     steps:
+     - name: executing remote ssh commands using password
+       uses: appleboy/ssh-action@v1.1.0
+       with:
+         host: ${{ secrets.LT20KMPH_HOST }}
+         username: ${{ secrets.LT20KMPH_USER }}
+         key: ${{ secrets.LT20KMPH_KEY }}
+         port: ${{ secrets.LT20KMPH_PORT }}
+         script: |
+           cd /srv/sites/jv
+           ./deploy.sh
