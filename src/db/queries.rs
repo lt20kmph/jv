@@ -378,3 +378,44 @@ pub async fn verify_user(db: &Db, verification_uuid: &str) -> Result<String, sql
 
     Ok(email)
 }
+
+pub async fn get_galleries(db: &Db) -> Result<Vec<models::Gallery>, sqlx::Error> {
+    let mut galleries = vec![];
+
+    let mut rows = sqlx::query(
+        r#"
+        SELECT 
+          galleries.id AS id,
+          galleries.name AS name,
+          galleries.time_created AS time_created,
+          count(*) AS n_images,
+          max(modified_images.path) AS last_image
+        FROM galleries 
+        INNER JOIN original_images ON galleries.id = original_images.gallery_id
+        INNER JOIN modified_images ON original_images.id = modified_images.original_image_id
+        GROUP BY galleries.id, galleries.name, galleries.time_created
+        "#,
+    )
+    .fetch(&db.0);
+
+    while let Ok(row) = rows.try_next().await {
+        let row = match row {
+            Some(row) => row,
+            None => break,
+        };
+        let id: i64 = row.get(0);
+        let name: String = row.get(1);
+        let time_created: String = row.get(2);
+        let n_images: i64 = row.get(3);
+        let last_image: String = row.get(4);
+        galleries.push(models::Gallery {
+            id,
+            name,
+            example_image_path: last_image,
+            image_count: n_images,
+            time_created,
+        });
+    }
+
+    Ok(galleries)
+}

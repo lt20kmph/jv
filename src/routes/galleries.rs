@@ -5,8 +5,8 @@ use crate::errors;
 use crate::models::models;
 use rocket::form::Form;
 use rocket::http::Status;
-use rocket::post;
 use rocket::response::content;
+use rocket::{get, post};
 
 #[post("/galleries", data = "<create_gallery>")]
 pub async fn post(
@@ -51,6 +51,7 @@ pub async fn post_img(
     .await?;
 
     // Save the file (persist to should be more performant... but this should be good enough)
+    // TODO: These can be done in parallel
     img_upload.file.copy_to(&img_path.original_path).await?;
     img_upload.modified_file.copy_to(&img_path.path).await?;
 
@@ -60,4 +61,13 @@ pub async fn post_img(
     let image_item = constants::TEMPLATES.render("image_item.html", &context)?;
 
     Ok(content::RawHtml(image_item))
+}
+
+#[get("/galleries")]
+pub async fn get(db: &Db) -> Result<content::RawHtml<String>, errors::AppError> {
+    let galleries = queries::get_galleries(db).await?;
+    let mut context = tera::Context::new();
+    context.insert("galleries", &galleries);
+    let galleries_html = constants::TEMPLATES.render("galleries.html", &context)?;
+    Ok(content::RawHtml(galleries_html))
 }

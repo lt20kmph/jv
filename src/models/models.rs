@@ -50,3 +50,13 @@ pub struct Image {
     pub path: String,
     pub caption: String,
 }
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct Gallery {
+    pub id: i64,
+    pub name: String,
+    pub example_image_path: String,
+    pub image_count: i64,
+    pub time_created: String,
+}

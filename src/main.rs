@@ -59,6 +59,7 @@ fn stage() -> AdHoc {
             .mount(
                 "/",
                 routes![
+                    galleries::get,
                     galleries::post,
                     galleries::post_img,
                     signup::post,
