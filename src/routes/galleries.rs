@@ -14,7 +14,15 @@ pub async fn post(
     session: models::Session,
     db: &Db,
 ) -> Result<content::RawHtml<String>, errors::AppError> {
-    let gallery_id = queries::create_gallery(db, session.user_id, create_gallery.name).await?;
+    let gallery_name = create_gallery.name;
+
+    let gallery_name = match gallery_name {
+        Some(name) => name,
+        None => "Untitled",
+    };
+
+    let gallery_id = queries::create_gallery(db, session.user_id, gallery_name).await?;
+
     // Redirect to gallery page
     Ok(content::RawHtml(format!(
         "Gallery created with id: {}",

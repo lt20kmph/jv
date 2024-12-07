@@ -24,7 +24,7 @@ pub struct ImgUpload<'f> {
 
 #[derive(FromForm)]
 pub struct CreateGallery<'f> {
-    pub name: &'f str,
+    pub name: Option<&'f str>,
 }
 
 #[derive(Debug)]
