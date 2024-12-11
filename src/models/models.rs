@@ -27,11 +27,25 @@ pub struct CreateGallery<'f> {
     pub name: Option<&'f str>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(crate = "rocket::serde")]
+pub enum Role {
+    Reader,
+    Writer,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct User {
+    pub id: i64,
+    pub email: String,
+    pub role: Role,
+}
+
 #[derive(Debug)]
 pub struct Session {
-    #[allow(dead_code)]
     pub session_token: String,
-    pub user_id: i64,
+    pub user: User,
 }
 
 pub struct SaltedPassword {
@@ -44,7 +58,7 @@ pub struct ImgPath {
     pub original_path: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
 pub struct Image {
     pub path: String,
@@ -53,10 +67,19 @@ pub struct Image {
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct Gallery {
+pub struct GalleryTile {
     pub id: i64,
     pub name: String,
     pub example_image_path: String,
     pub image_count: i64,
+    pub time_created: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct GalleryContents {
+    pub id: i64,
+    pub name: String,
+    pub images: Vec<Image>,
     pub time_created: String,
 }

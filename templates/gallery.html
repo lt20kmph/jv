@@ -1,8 +1,29 @@
-<div id='gallery'>
-  {% for image in images %}
-  {{ macros::image_item(path=image.path, caption=image.caption) }}
-  {% else %}
-  <p>Hmm... Nothing here yet...</p>
-  {% endfor %}
-  <div class="clearfix"></div>
+{% import "macros.html" as macros %}
+{% extends "base.html" %}
+{% block title %}John Vittorio{% endblock title %}
+{% block body %}
+
+<ul class="concert-one-regular">
+  {% if user.role =='Writer' %}
+  <li>
+    <a hx-get="/galleries/{{gallery_id}}/upload_form" hx-target="#upload_form">Upload pictures</a>
+  </li>
+  {% endif %}
+  <li style="float:right">
+    <a class="active" hx-get="/about.html" hx-target="#content">About</a>
+  </li>
+</ul>
+
+<div id="content" class="montserrat-body">
+  <div id="upload_form"></div>
+  <div id='gallery'>
+    {% for image in images %}
+    {{ macros::image_item(path=image.path, caption=image.caption) }}
+    {% else %}
+    <p>Hmm... Nothing here yet...</p>
+    {% endfor %}
+    <div class="clearfix"></div>
+  </div>
 </div>
+
+{% endblock body %}

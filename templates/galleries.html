@@ -4,9 +4,11 @@
 {% block body %}
 
 <ul class="concert-one-regular">
+  {% if user.role =='Writer' %}
   <li>
     <a hx-post="/galleries" hx-target="#content">Create new gallery</a>
   </li>
+  {% endif %}
   <li style="float:right">
     <a class="active" hx-get="/about.html" hx-target="#content">About</a>
   </li>
@@ -15,7 +17,7 @@
 <div id="content" class="montserrat-body">
   <div id='galleries'>
     {% for gallery in galleries %}
-    {{ macros::gallery_item(path=gallery.example_image_path, name=gallery.name) }}
+    {{ macros::gallery_item(path=gallery.example_image_path, name=gallery.name, gallery_id=gallery.id) }}
     {% else %}
     <p>Hmm... Nothing here yet...</p>
     {% endfor %}

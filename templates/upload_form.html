@@ -2,19 +2,6 @@
 </link>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
 
-<!-- <form hx-encoding='multipart/form-data' hx-post='/galleries/{{gallery_id}}' hx-target='#gallery' hx-swap='beforeend' -->
-<!--   id='upload-demo' _='on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100'> -->
-<!--   <label for='file-input'>Choose a file</label> -->
-<!--   <label for='caption-input'>Caption</label> -->
-<!--   <input type='file' name='file' oninput="uploadFile()" id="file-input"> -->
-<!--   <input type='text' name='caption' id="caption-input"> -->
-<!--   <button> -->
-<!--     Upload -->
-<!--   </button> -->
-<!--   <progress id='progress' value='0' max='100'></progress> -->
-<!--   <div id='croppie'></div> -->
-<!-- </form> -->
-
 <form
   hx-encoding='multipart/form-data'
   hx-post='/galleries/{{gallery_id}}'

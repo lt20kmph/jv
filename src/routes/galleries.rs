@@ -21,7 +21,7 @@ pub async fn post(
         None => "Untitled",
     };
 
-    let gallery_id = queries::create_gallery(db, session.user_id, gallery_name).await?;
+    let gallery_id = queries::create_gallery(db, session.user.id, gallery_name).await?;
 
     // Redirect to gallery page
     Ok(content::RawHtml(format!(
@@ -51,7 +51,7 @@ pub async fn post_img(
 
     let img_path = queries::create_image(
         db,
-        session.user_id,
+        session.user.id,
         gallery_id,
         original_path,
         img_upload.caption,
@@ -72,10 +72,45 @@ pub async fn post_img(
 }
 
 #[get("/galleries")]
-pub async fn get(db: &Db) -> Result<content::RawHtml<String>, errors::AppError> {
+pub async fn get(
+    db: &Db,
+    session: models::Session,
+) -> Result<content::RawHtml<String>, errors::AppError> {
     let galleries = queries::get_galleries(db).await?;
+
     let mut context = tera::Context::new();
     context.insert("galleries", &galleries);
+    context.insert("user", &session.user);
+
     let galleries_html = constants::TEMPLATES.render("galleries.html", &context)?;
     Ok(content::RawHtml(galleries_html))
+}
+
+#[get("/galleries/<gallery_id>")]
+pub async fn get_gallery(
+    db: &Db,
+    session: models::Session,
+    gallery_id: i64,
+) -> Result<content::RawHtml<String>, errors::AppError> {
+    let gallery = queries::get_gallery(db, gallery_id).await?;
+
+    let mut context = tera::Context::new();
+    context.insert("gallery_id", &gallery_id);
+    context.insert("images", &gallery.images);
+    context.insert("user", &session.user);
+
+    let gallery_html = constants::TEMPLATES.render("gallery.html", &context)?;
+    Ok(content::RawHtml(gallery_html))
+}
+
+#[get("/galleries/<gallery_id>/upload_form")]
+pub async fn get_upload_form(
+    _session: models::Session,
+    gallery_id: i64,
+) -> Result<content::RawHtml<String>, errors::AppError> {
+    let mut context = tera::Context::new();
+    context.insert("gallery_id", &gallery_id);
+
+    let upload_form = constants::TEMPLATES.render("upload_form.html", &context)?;
+    Ok(content::RawHtml(upload_form))
 }
