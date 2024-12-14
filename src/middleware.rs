@@ -33,18 +33,18 @@ impl<'r> FromRequest<'r> for Session {
 
         debug!("Getting user id from session token");
 
-        let user_id = queries::get_user_id_from_session_token(&session_token, pool).await;
+        let user = queries::get_user_from_session_token(&session_token, pool).await;
 
-        let user_id = match user_id {
-            Ok(user_id) => user_id,
+        let user = match user {
+            Ok(user) => user,
             Err(_) => return Outcome::Error((Status::Unauthorized, ())),
         };
 
-        debug!("User id: {:?}", user_id);
+        debug!("Getting session for user: (user_id: {:?})", user);
 
         let session = Session {
             session_token,
-            user_id,
+            user,
         };
 
         debug!("Session: {:?}", session);

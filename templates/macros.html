@@ -1,10 +1,21 @@
 {% macro image_item(path, caption) %}
 <div class="gallery-responsive">
   <div class="gallery">
-    <a target="_blank" href="{{path}}">
-      <img src="{{path}}" alt="{{caption}}" width="600" height="400">
+    <a target="_blank" href="/{{path}}">
+      <img src="/{{path}}" alt="{{caption}}" width="600" height="400">
     </a>
     <div class="gallery-desc">{{caption}}</div>
+  </div>
+</div>
+{% endmacro input %}
+
+{% macro gallery_item(path, name, gallery_id) %}
+<div class="gallery-responsive">
+  <div class="gallery">
+    <a href="/galleries/{{gallery_id}}">
+      <img src="/{{path}}" alt="{{name}}" width="600" height="400">
+    </a>
+    <div class="gallery-desc">{{name}}</div>
   </div>
 </div>
 {% endmacro input %}

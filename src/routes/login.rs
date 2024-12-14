@@ -34,5 +34,5 @@ pub async fn post(
             message: "Invalid Credentials".to_string(),
         });
     }
-    Ok(Redirect::to("/"))
+    Ok(Redirect::to("/galleries"))
 }

@@ -80,6 +80,15 @@ impl From<reqwest::Error> for AppError {
     }
 }
 
+impl From<String> for AppError {
+    fn from(error: String) -> Self {
+        AppError {
+            code: 500,
+            message: error,
+        }
+    }
+}
+
 #[rocket::async_trait]
 impl<'r> Responder<'r, 'static> for AppError {
     fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {

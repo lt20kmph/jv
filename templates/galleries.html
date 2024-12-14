@@ -6,7 +6,7 @@
 <ul class="concert-one-regular">
   {% if user.role =='Writer' %}
   <li>
-    <a hx-get="/galleries/{{gallery_id}}/upload_form" hx-target="#upload_form">Upload pictures</a>
+    <a hx-post="/galleries" hx-target="#content">Create new gallery</a>
   </li>
   {% endif %}
   <li style="float:right">
@@ -14,11 +14,10 @@
   </li>
 </ul>
 
-<div id="upload_form"></div>
-<div id="content" class="montserrat-body content">
-  <div id='gallery'>
-    {% for image in images %}
-    {{ macros::image_item(path=image.path, caption=image.caption) }}
+<div id="content" class="montserrat-body">
+  <div id='galleries'>
+    {% for gallery in galleries %}
+    {{ macros::gallery_item(path=gallery.example_image_path, name=gallery.name, gallery_id=gallery.id) }}
     {% else %}
     <p>Hmm... Nothing here yet...</p>
     {% endfor %}

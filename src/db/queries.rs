@@ -215,24 +215,42 @@ pub async fn verify_password(
     )?)
 }
 
-pub async fn get_user_id_from_session_token(
+pub async fn get_user_from_session_token(
     session_token: &str,
     pool: &Db,
-) -> Result<i64, sqlx::Error> {
+) -> Result<models::User, sqlx::Error> {
     let row = sqlx::query(
         r#"
-        SELECT user_id FROM sessions WHERE session_token = ?1
+        SELECT 
+            users.id, 
+            users.email,
+            users.role
+        FROM sessions
+        INNER JOIN users ON sessions.user_id = users.id
+        WHERE session_token = ?1
         "#,
     )
     .bind(&session_token)
     .fetch_one(&pool.0)
     .await?;
 
+    info!("Got user from session token");
+
     let user_id: i64 = row.get(0);
-    sqlx::Result::Ok(user_id)
+    let email: String = row.get(1);
+    let role: models::Role = match row.get(2) {
+        "reader" => models::Role::Reader,
+        "writer" => models::Role::Writer,
+        _ => models::Role::Reader,
+    };
+
+    sqlx::Result::Ok(models::User {
+        id: user_id,
+        email,
+        role,
+    })
 }
 
-// Create new gallery, return gallery_id
 pub async fn create_gallery(db: &Db, user_id: i64, name: &str) -> Result<i64, sqlx::Error> {
     let row = sqlx::query(
         r#"
@@ -377,4 +395,101 @@ pub async fn verify_user(db: &Db, verification_uuid: &str) -> Result<String, sql
     let email: String = row.get(0);
 
     Ok(email)
+}
+
+pub async fn get_galleries(db: &Db) -> Result<Vec<models::GalleryTile>, sqlx::Error> {
+    let mut galleries = vec![];
+
+    let mut rows = sqlx::query(
+        r#"
+        SELECT 
+          galleries.id AS id,
+          galleries.name AS name,
+          galleries.time_created AS time_created,
+          count(*) AS n_images,
+          max(modified_images.path) AS last_image
+        FROM galleries 
+        LEFT JOIN original_images ON galleries.id = original_images.gallery_id
+        LEFT JOIN modified_images ON original_images.id = modified_images.original_image_id
+        GROUP BY galleries.id, galleries.name, galleries.time_created
+        "#,
+    )
+    .fetch(&db.0);
+
+    while let Ok(row) = rows.try_next().await {
+        let row = match row {
+            Some(row) => row,
+            None => break,
+        };
+        let id: i64 = row.get(0);
+        let name: String = row.get(1);
+        let time_created: String = row.get(2);
+        let n_images: i64 = row.get(3);
+        let last_image: String = row.get(4);
+        galleries.push(models::GalleryTile {
+            id,
+            name,
+            example_image_path: last_image,
+            image_count: n_images,
+            time_created,
+        });
+    }
+
+    Ok(galleries)
+}
+
+pub async fn get_gallery(
+    db: &Db,
+    gallery_id: i64,
+) -> Result<models::GalleryContents, errors::AppError> {
+    let mut rows = sqlx::query(
+        r#"
+        SELECT 
+            name,
+            galleries.time_created,
+            gallery_text,
+            modified_images.path AS path,
+            modified_images.caption AS caption
+        FROM galleries 
+        LEFT JOIN original_images ON galleries.id = original_images.gallery_id
+        LEFT JOIN modified_images ON original_images.id = modified_images.original_image_id
+        WHERE galleries.id = ?1
+        "#,
+    )
+    .bind(gallery_id)
+    .fetch(&db.0);
+
+    let mut images = vec![];
+    let mut name = None;
+    let mut time_created = None;
+
+    while let Ok(row) = rows.try_next().await {
+        let row = match row {
+            Some(row) => row,
+            None => break,
+        };
+        if name.is_none() {
+            info!("Getting name");
+            name = Some(row.get(0));
+            info!("Name: {}", name.clone().unwrap());
+        }
+        if time_created.is_none() {
+            info!("Getting time created");
+            time_created = Some(row.get(1));
+            info!("Time created: {}", time_created.clone().unwrap());
+        }
+        let path: String = row.get(3);
+        let caption: String = row.get(4);
+        if path.is_empty() {
+            continue;
+        }
+        images.push(models::Image { path, caption });
+    }
+
+    Ok(models::GalleryContents {
+        id: gallery_id,
+        name: name.ok_or("Couldn't get gallery name".to_string())?,
+        images,
+        time_created: time_created.ok_or("Couldn't get gallery time created".to_string())?,
+    })
 }
