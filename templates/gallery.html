@@ -14,8 +14,8 @@
   </li>
 </ul>
 
-<div id="content" class="montserrat-body">
-  <div id="upload_form"></div>
+<div id="upload_form"></div>
+<div id="content" class="montserrat-body content">
   <div id='gallery'>
     {% for image in images %}
     {{ macros::image_item(path=image.path, caption=image.caption) }}
