@@ -61,6 +61,7 @@ async fn create_galleries_table(db: &Db) -> Result<(), sqlx::Error> {
             user_id INTEGER NOT NULL,
             name TEXT NOT NULL,
             gallery_text TEXT NOT NULL,
+            status TEXT DEFAULT 'public',
             time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
@@ -254,7 +255,7 @@ pub async fn get_user_from_session_token(
 pub async fn create_gallery(db: &Db, user_id: i64, name: &str) -> Result<i64, sqlx::Error> {
     let row = sqlx::query(
         r#"
-        INSERT INTO galleries (user_id, name, gallery_text) VALUES (?1, ?2, '') RETURNING id
+        INSERT INTO galleries (user_id, name, gallery_text, status) VALUES (?1, ?2, '', 'public') RETURNING id
         "#,
     )
     .bind(user_id)
@@ -407,11 +408,15 @@ pub async fn get_galleries(db: &Db) -> Result<Vec<models::GalleryTile>, sqlx::Er
           galleries.name AS name,
           galleries.time_created AS time_created,
           count(*) AS n_images,
-          max(modified_images.path) AS last_image
+          max(modified_images.path) AS last_image,
+          users.email AS created_by
         FROM galleries 
         LEFT JOIN original_images ON galleries.id = original_images.gallery_id
         LEFT JOIN modified_images ON original_images.id = modified_images.original_image_id
+        LEFT JOIN users ON galleries.user_id = users.id
+        WHERE galleries.status != 'deleted'
         GROUP BY galleries.id, galleries.name, galleries.time_created
+        ORDER BY galleries.time_created DESC
         "#,
     )
     .fetch(&db.0);
@@ -424,15 +429,20 @@ pub async fn get_galleries(db: &Db) -> Result<Vec<models::GalleryTile>, sqlx::Er
         let id: i64 = row.get(0);
         let name: String = row.get(1);
         let time_created: String = row.get(2);
-        let n_images: i64 = row.get(3);
-        let last_image: String = row.get(4);
-        galleries.push(models::GalleryTile {
+        let mut n_images: i64 = row.get(3);
+        let last_image: Option<String> = row.get(4);
+        let created_by: String = row.get(5);
+        if last_image.is_none() {
+            n_images = 0;
+        }
+        galleries.push(models::GalleryTile::new(
             id,
             name,
-            example_image_path: last_image,
-            image_count: n_images,
+            last_image,
+            n_images,
             time_created,
-        });
+            created_by,
+        ));
     }
 
     Ok(galleries)
@@ -492,4 +502,41 @@ pub async fn get_gallery(
         images,
         time_created: time_created.ok_or("Couldn't get gallery time created".to_string())?,
     })
+}
+
+pub async fn delete_gallery(db: &Db, gallery_id: i64) -> Result<(), sqlx::Error> {
+    let result = sqlx::query(
+        r#"
+        UPDATE galleries SET status = 'deleted' WHERE id = ?1
+        "#,
+    )
+    .bind(gallery_id)
+    .execute(&db.0)
+    .await;
+
+    match result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
+}
+
+pub async fn update_gallery(
+    db: &Db,
+    gallery_id: i64,
+    update: models::GalleryUpdate<'_>,
+) -> Result<(), sqlx::Error> {
+    let result = sqlx::query(
+        r#"
+        UPDATE galleries SET name = ?1 WHERE id = ?2
+        "#,
+    )
+    .bind(update.name)
+    .bind(gallery_id)
+    .execute(&db.0)
+    .await;
+
+    match result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    }
 }

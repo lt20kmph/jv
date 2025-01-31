@@ -2,32 +2,32 @@
 </link>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
 
-<form
-  hx-encoding='multipart/form-data'
-  hx-post='/galleries/{{gallery_id}}'
-  hx-target='#gallery'
-  hx-swap='beforeend'
-  id='upload-demo'
-  class='upload-form horizontal-container'
-  _='on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100'
->
-  <div>
-  <h2>Upload Your Gallery Item</h2>
-  <div class='form-group'>
-    <label for='file-input'>Choose a file</label>
-    <input type='file' name='file' oninput="uploadFile()" id="file-input" class='file-input'>
+<form hx-encoding='multipart/form-data' hx-post='/galleries/{{gallery_id}}' hx-target='#gallery' hx-swap='beforeend'
+  id='upload-demo' class='upload-form'
+  _='on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100'>
+  <div class="upload-form-title">
+    <span>+ Upload Your Gallery Item</span>
+    <span class="close-button" onclick="document.getElementById('upload_form').style.display='none'">X</span>
   </div>
+  <div class='horizontal-container'>
+    <div>
+      <!-- <h2>+ Upload Your Gallery Item</h2> -->
+      <div class='form-group'>
+        <!-- <label for='file-input'>+</label> -->
+        <input type='file' name='file' oninput="uploadFile()" id="file-input" class='file-input'>
+      </div>
 
-  <div class='form-group'>
-    <label for='caption-input'>Caption</label>
-    <input type='text' name='caption' id="caption-input" class='caption-input' placeholder='Enter a caption...'>
-  </div>
+      <div class='form-group'>
+        <!-- <label for='caption-input'>+</label> -->
+        <input type='text' name='caption' id="caption-input" class='caption-input' placeholder='Enter a caption...'>
+      </div>
 
-  <button type='submit' class='upload-button'>Upload</button>
-  
-  <progress id='progress' value='0' max='100' class='progress-bar'></progress>
+      <button type='submit' class='upload-button'>Upload</button>
+
+      <!-- <progress id='progress' value='0' max='100' class='progress-bar'></progress> -->
+    </div>
+    <div id='croppie'></div>
   </div>
-  <div id='croppie'></div>
 </form>
 
 <script src="/js/upload.js"></script>

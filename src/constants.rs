@@ -17,7 +17,7 @@ pub static WELCOME_CATEGORY: &str = "welcome";
 lazy_static! {
     pub static ref COLORS: HashMap<&'static str, &'static str> = [
         ("black", "#252422"),
-        ("brown", "#ff9b42"),
+        ("brown", "#3A2F2F"),
         ("vanilla", "#e3e7af"),
         ("blue", "#6a8eae"),
         ("sugar", "#be9e46"),

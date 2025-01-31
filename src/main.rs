@@ -63,6 +63,8 @@ fn stage() -> AdHoc {
                     galleries::post_img,
                     galleries::get,
                     galleries::get_gallery,
+                    galleries::delete_gallery,
+                    galleries::update_gallery,
                     galleries::get_upload_form,
                     login::post,
                     login::get,
