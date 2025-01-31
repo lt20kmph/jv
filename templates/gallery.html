@@ -3,10 +3,13 @@
 {% block title %}John Vittorio{% endblock title %}
 {% block body %}
 
-<ul class="concert-one-regular">
+<ul class="concert-one-regular navbar">
   {% if user.role =='Writer' %}
   <li>
-    <a hx-get="/galleries/{{gallery_id}}/upload_form" hx-target="#upload_form">Upload pictures</a>
+    <a hx-get="/galleries/{{gallery_id}}/upload_form" hx-target="#upload_form"
+      hx-on:htmx:before-request="beforeUploadFormRequest();">
+      + Upload pictures
+    </a>
   </li>
   {% endif %}
   <li style="float:right">
@@ -14,7 +17,7 @@
   </li>
 </ul>
 
-<div id="upload_form"></div>
+<div id="upload_form" class="montserrat-body"></div>
 <div id="content" class="montserrat-body content">
   <div id='gallery'>
     {% for image in images %}
@@ -25,5 +28,7 @@
     <div class="clearfix"></div>
   </div>
 </div>
+
+<script src="/js/gallery.js"></script>
 
 {% endblock body %}

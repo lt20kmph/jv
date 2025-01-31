@@ -3,10 +3,12 @@
 {% block title %}John Vittorio{% endblock title %}
 {% block body %}
 
-<ul class="concert-one-regular">
+<ul class="concert-one-regular navbar">
   {% if user.role =='Writer' %}
   <li>
-    <a hx-post="/galleries" hx-target="#content">Create new gallery</a>
+    <a hx-post="/galleries" hx-target="#galleries" hx-swap="afterbegin">
+      + Create new gallery
+    </a>
   </li>
   {% endif %}
   <li style="float:right">
@@ -14,15 +16,19 @@
   </li>
 </ul>
 
-<div id="content" class="montserrat-body">
-  <div id='galleries'>
-    {% for gallery in galleries %}
-    {{ macros::gallery_item(path=gallery.example_image_path, name=gallery.name, gallery_id=gallery.id) }}
-    {% else %}
-    <p>Hmm... Nothing here yet...</p>
-    {% endfor %}
-    <div class="clearfix"></div>
-  </div>
+<div id="content" class="montserrat-body content">
+  <div>
+    <div id='galleries'>
+      {% for gallery in galleries %}
+      {{ macros::gallery_item(gallery=gallery) }}
+      {% else %}
+      <p>Hmm... Nothing here yet...</p>
+      {% endfor %}
+      <div class="clearfix"></div>
+    </div>
+  </div
 </div>
+
+<script src="js/galleries.js"></script>
 
 {% endblock body %}

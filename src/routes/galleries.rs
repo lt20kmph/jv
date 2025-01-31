@@ -6,7 +6,7 @@ use crate::models::models;
 use rocket::form::Form;
 use rocket::http::Status;
 use rocket::response::content;
-use rocket::{get, post};
+use rocket::{delete, get, post, put};
 
 #[post("/galleries", data = "<create_gallery>")]
 pub async fn post(
@@ -23,11 +23,20 @@ pub async fn post(
 
     let gallery_id = queries::create_gallery(db, session.user.id, gallery_name).await?;
 
-    // Redirect to gallery page
-    Ok(content::RawHtml(format!(
-        "Gallery created with id: {}",
-        gallery_id
-    )))
+    let gallery = models::GalleryTile::new(
+        gallery_id,
+        gallery_name.to_string(),
+        None,
+        0,
+        chrono::Utc::now().to_string(),
+        session.user.email.to_string(),
+    );
+
+    let mut context = tera::Context::new();
+    context.insert("gallery", &gallery);
+    let new_gallery = constants::TEMPLATES.render("new_gallery.html", &context)?;
+
+    Ok(content::RawHtml(new_gallery))
 }
 
 #[post("/galleries/<gallery_id>", data = "<img_upload>")]
@@ -101,6 +110,30 @@ pub async fn get_gallery(
 
     let gallery_html = constants::TEMPLATES.render("gallery.html", &context)?;
     Ok(content::RawHtml(gallery_html))
+}
+
+#[delete("/galleries/<gallery_id>")]
+pub async fn delete_gallery(
+    db: &Db,
+    session: models::Session,
+    gallery_id: i64,
+) -> Result<content::RawHtml<String>, errors::AppError> {
+    let gallery = queries::delete_gallery(db, gallery_id).await?;
+    Ok(content::RawHtml(format!("Gallery deleted: {:?}", gallery)))
+}
+
+#[put("/galleries/<gallery_id>", data = "<update>")]
+pub async fn update_gallery(
+    mut update: Form<models::GalleryUpdate<'_>>,
+    db: &Db,
+    session: models::Session,
+    gallery_id: i64,
+) -> Result<content::RawHtml<String>, errors::AppError> {
+    let gallery = queries::update_gallery(db, gallery_id, update.into_inner()).await?;
+    Ok(content::RawHtml(format!(
+        "Gallery title updated: {:?}",
+        gallery
+    )))
 }
 
 #[get("/galleries/<gallery_id>/upload_form")]
