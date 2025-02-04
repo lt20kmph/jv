@@ -66,6 +66,9 @@ fn stage() -> AdHoc {
                     galleries::delete_gallery,
                     galleries::update_gallery,
                     galleries::get_upload_form,
+                    galleries::get_gallery_item,
+                    img::delete,
+                    img::get,
                     login::post,
                     login::get,
                     signup::post,
@@ -74,7 +77,6 @@ fn stage() -> AdHoc {
                     index::get,
                     css::get,
                     js::get,
-                    img::get
                 ],
             )
     })

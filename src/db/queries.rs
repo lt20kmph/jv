@@ -84,6 +84,7 @@ async fn create_modified_images_table(db: &Db) -> Result<(), sqlx::Error> {
             caption TEXT NOT NULL,
             time_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             time_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            status TEXT DEFAULT 'public',
             FOREIGN KEY (original_image_id) REFERENCES original_images(id)
         )
         "#,
@@ -315,25 +316,30 @@ async fn insert_modified_image(
     original_image_id: i64,
     img_path: &models::ImgPath,
     caption: &str,
-) -> Result<(), sqlx::Error> {
-    sqlx::query(
+) -> Result<i64, sqlx::Error> {
+    let row = sqlx::query(
         r#"
         INSERT INTO modified_images (
             user_id,
             original_image_id,
             path,
-            caption
-        ) VALUES (?1, ?2, ?3, ?4)
+            caption,
+            status
+        ) VALUES (?1, ?2, ?3, ?4, ?5)
+        RETURNING id
         "#,
     )
     .bind(user_id)
     .bind(original_image_id)
     .bind(&img_path.path)
     .bind(caption)
+    .bind("public")
     .execute(&db.0)
     .await?;
 
-    Ok(())
+    let modified_image_id = row.last_insert_rowid();
+
+    Ok(modified_image_id)
 }
 
 // Create new image, return image_path
@@ -343,15 +349,21 @@ pub async fn create_image(
     gallery_id: i64,
     original_filename: &str,
     caption: &str,
-) -> Result<models::ImgPath, sqlx::Error> {
+) -> Result<models::Image, sqlx::Error> {
     let img_path = models::ImgPath::new();
 
     let original_image_id =
         insert_original_image(db, user_id, gallery_id, &img_path, original_filename).await?;
 
-    insert_modified_image(db, user_id, original_image_id, &img_path, caption).await?;
+    let modified_image_id =
+        insert_modified_image(db, user_id, original_image_id, &img_path, caption).await?;
 
-    Ok(img_path)
+    Ok(models::Image {
+        id: modified_image_id,
+        path: img_path.path,
+        original_path: Some(img_path.original_path),
+        caption: caption.to_string(),
+    })
 }
 
 pub async fn get_gallery_images(db: &Db, gallery_id: i64) -> Vec<models::Image> {
@@ -360,6 +372,7 @@ pub async fn get_gallery_images(db: &Db, gallery_id: i64) -> Vec<models::Image> 
     let mut rows = sqlx::query(
         r#"
         SELECT
+            modified_images.id,
             modified_images.path,
             modified_images.caption
         FROM original_images
@@ -375,9 +388,10 @@ pub async fn get_gallery_images(db: &Db, gallery_id: i64) -> Vec<models::Image> 
             Some(row) => row,
             None => break,
         };
-        let path: String = row.get(0);
-        let caption: String = row.get(1);
-        images.push(models::Image { path, caption });
+        let id: i64 = row.get(0);
+        let path: String = row.get(1);
+        let caption: String = row.get(2);
+        images.push(models::Image { id, path, original_path: None, caption });
     }
 
     images
@@ -458,12 +472,14 @@ pub async fn get_gallery(
             name,
             galleries.time_created,
             gallery_text,
+            modified_images.id AS image_id,
             modified_images.path AS path,
             modified_images.caption AS caption
         FROM galleries 
         LEFT JOIN original_images ON galleries.id = original_images.gallery_id
         LEFT JOIN modified_images ON original_images.id = modified_images.original_image_id
-        WHERE galleries.id = ?1
+        WHERE galleries.id = ?1 
+        AND modified_images.status = 'public'
         "#,
     )
     .bind(gallery_id)
@@ -488,12 +504,18 @@ pub async fn get_gallery(
             time_created = Some(row.get(1));
             info!("Time created: {}", time_created.clone().unwrap());
         }
-        let path: String = row.get(3);
-        let caption: String = row.get(4);
+        let image_id: i64 = row.get(3);
+        let path: String = row.get(4);
+        let caption: String = row.get(5);
         if path.is_empty() {
             continue;
         }
-        images.push(models::Image { path, caption });
+        images.push(models::Image {
+            id: image_id,
+            path,
+            original_path: None,
+            caption,
+        });
     }
 
     Ok(models::GalleryContents {
@@ -539,4 +561,17 @@ pub async fn update_gallery(
         Ok(_) => Ok(()),
         Err(e) => Err(e),
     }
+}
+
+pub async fn delete_image(db: &Db, image_id: i64) -> Result<(), sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        UPDATE modified_images SET status = 'deleted' WHERE id = ?1
+        "#,
+    )
+    .bind(image_id)
+    .execute(&db.0)
+    .await?;
+
+    Ok(())
 }

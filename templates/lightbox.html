@@ -1,0 +1,14 @@
+<div>
+  <div class="lightbox-container">
+    <div class="lightbox">
+      <button class="lightbox-nav-button lightbox-prev-button"
+        hx-get="/galleries/{{gallery_id}}/lightbox/{{previous_image_id}}" hx-target="#lightbox">
+        ‹</button>
+      <img src="/{{this_image.path}}" alt="{{this_image.caption}}">
+      <button class="lightbox-nav-button lightbox-next-button"
+        hx-get="/galleries/{{gallery_id}}/lightbox/{{next_image_id}}" hx-target="#lightbox">
+        ›</button>
+      <div class="lightbox-caption">{{this_image.caption}}</div>
+    </div>
+  </div>
+</div>
