@@ -4,7 +4,6 @@ use tera::Tera;
 use log::error;
 
 pub static SESSION_LENGTH: i64 = 60 * 60 * 24 * 7; // 1 week
-pub static MAX_FILE_SIZE: u64 = 1024 * 1024 * 10; // 10 MB
 
 pub static IMG_PATH: &str = "./img";
 pub static MAILTRAP_SEND: &str = "https://send.api.mailtrap.io/api/send";
@@ -13,6 +12,8 @@ pub static VERIFY_NEW_USER_SUBJECT: &str = "Verify new user";
 pub static VERIFY_NEW_USER_CATEGORY: &str = "verify_new_user";
 pub static WELCOME_SUBJECT: &str = "Welcome to JV";
 pub static WELCOME_CATEGORY: &str = "welcome";
+pub static THUMBNAIL_SIZE: u32 = 300;
+pub static THUMBNAIL_EXT: &str = "thumbnail.jpg";
 
 lazy_static! {
     pub static ref COLORS: HashMap<&'static str, &'static str> = [

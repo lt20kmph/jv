@@ -91,9 +91,9 @@ pub async fn post_img(
 
     info!("Creating thumbnail for: {}", &image.path);
 
-    thumbnail = thumbnail.thumbnail(200, 200);
+    thumbnail = thumbnail.thumbnail(constants::THUMBNAIL_SIZE, constants::THUMBNAIL_SIZE);
 
-    let thumbnail_path = format!("{}.thumbnail.jpg", &image.path);
+    let thumbnail_path = format!("{}.{}", &image.path, constants::THUMBNAIL_EXT);
 
     info!("Saving thumbnail to: {}", &thumbnail_path);
 
