@@ -3,6 +3,8 @@ use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
 use crate::models::models;
+use image::ImageReader;
+
 use log::info;
 use rocket::form::Form;
 use rocket::http::Status;
@@ -83,7 +85,22 @@ pub async fn post_img(
     }
     img_upload.modified_file.copy_to(&image.path).await?;
 
+    let mut thumbnail = ImageReader::open(&image.path)?
+        .with_guessed_format()?
+        .decode()?;
+
+    info!("Creating thumbnail for: {}", &image.path);
+
+    thumbnail = thumbnail.thumbnail(200, 200);
+
+    let thumbnail_path = format!("{}.thumbnail.jpg", &image.path);
+
+    info!("Saving thumbnail to: {}", &thumbnail_path);
+
+    thumbnail.save(&thumbnail_path)?;
+
     let mut context = tera::Context::new();
+
     context.insert("path", &image.path);
     context.insert("caption", &img_upload.caption);
     context.insert("gallery_id", &gallery_id);
