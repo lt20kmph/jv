@@ -13,6 +13,7 @@ use rocket::{delete, get, post, put};
 
 #[post("/galleries", data = "<create_gallery>")]
 pub async fn post(
+    
     create_gallery: Form<models::CreateGallery<'_>>,
     session: models::Session,
     db: &Db,
@@ -193,7 +194,7 @@ pub async fn get_gallery_item(
 #[delete("/galleries/<gallery_id>")]
 pub async fn delete_gallery(
     db: &Db,
-    session: models::Session,
+    _session: models::Session,
     gallery_id: i64,
 ) -> Result<content::RawHtml<String>, errors::AppError> {
     let gallery = queries::delete_gallery(db, gallery_id).await?;
@@ -202,9 +203,9 @@ pub async fn delete_gallery(
 
 #[put("/galleries/<gallery_id>", data = "<update>")]
 pub async fn update_gallery(
-    mut update: Form<models::GalleryUpdate<'_>>,
+    update: Form<models::GalleryUpdate<'_>>,
     db: &Db,
-    session: models::Session,
+    _session: models::Session,
     gallery_id: i64,
 ) -> Result<content::RawHtml<String>, errors::AppError> {
     let gallery = queries::update_gallery(db, gallery_id, update.into_inner()).await?;

@@ -468,18 +468,24 @@ pub async fn get_gallery(
 ) -> Result<models::GalleryContents, errors::AppError> {
     let mut rows = sqlx::query(
         r#"
-        SELECT 
-            name,
-            galleries.time_created,
-            gallery_text,
+        WITH images AS (SELECT 
+            original_images.gallery_id AS gallery_id,
             modified_images.id AS image_id,
             modified_images.path AS path,
             modified_images.caption AS caption
-        FROM galleries 
-        LEFT JOIN original_images ON galleries.id = original_images.gallery_id
-        LEFT JOIN modified_images ON original_images.id = modified_images.original_image_id
-        WHERE galleries.id = ?1 
-        AND modified_images.status = 'public'
+        FROM modified_images 
+        LEFT JOIN original_images ON original_images.id = modified_images.original_image_id
+        WHERE original_images.gallery_id = ?1 AND modified_images.status = 'public')
+        SELECT 
+          galleries.name as gallery_name,
+          galleries.time_created as gallery_time_created,
+          galleries.gallery_text as gallery_text,
+          images.image_id as image_id,
+          images.path as image_path,
+          images.caption as image_caption
+        FROM images
+        RIGHT JOIN galleries on images.gallery_id = galleries.id
+        WHERE galleries.id = ?1
         "#,
     )
     .bind(gallery_id)
