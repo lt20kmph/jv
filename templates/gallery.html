@@ -18,10 +18,11 @@
 </ul>
 
 <div id="upload_form" class="montserrat-body"></div>
+<div id="lightbox" class="montserrat-body"></div>
 <div id="content" class="montserrat-body content">
   <div id='gallery'>
     {% for image in images %}
-    {{ macros::image_item(path=image.path, caption=image.caption) }}
+    {{ macros::image_item(path=image.path, caption=image.caption, image_id=image.id, gallery_id=gallery_id) }}
     {% else %}
     <p>Hmm... Nothing here yet...</p>
     {% endfor %}

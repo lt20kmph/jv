@@ -69,7 +69,9 @@ pub struct ImgPath {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
 pub struct Image {
+    pub id: i64,
     pub path: String,
+    pub original_path: Option<String>,
     pub caption: String,
 }
 

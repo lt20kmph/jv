@@ -3,6 +3,9 @@ use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
 use crate::models::models;
+use image::ImageReader;
+
+use log::info;
 use rocket::form::Form;
 use rocket::http::Status;
 use rocket::response::content;
@@ -10,6 +13,7 @@ use rocket::{delete, get, post, put};
 
 #[post("/galleries", data = "<create_gallery>")]
 pub async fn post(
+    
     create_gallery: Form<models::CreateGallery<'_>>,
     session: models::Session,
     db: &Db,
@@ -58,7 +62,7 @@ pub async fn post_img(
         }
     };
 
-    let img_path = queries::create_image(
+    let image = queries::create_image(
         db,
         session.user.id,
         gallery_id,
@@ -69,12 +73,40 @@ pub async fn post_img(
 
     // Save the file (persist to should be more performant... but this should be good enough)
     // TODO: These can be done in parallel
-    img_upload.file.copy_to(&img_path.original_path).await?;
-    img_upload.modified_file.copy_to(&img_path.path).await?;
+    match image.original_path {
+        Some(original_path) => {
+            img_upload.file.copy_to(&original_path).await?;
+        }
+        None => {
+            return Err(errors::AppError {
+                message: "No original path found".to_string(),
+                code: Status::InternalServerError.code,
+            })
+        }
+    }
+    img_upload.modified_file.copy_to(&image.path).await?;
+
+    let mut thumbnail = ImageReader::open(&image.path)?
+        .with_guessed_format()?
+        .decode()?;
+
+    info!("Creating thumbnail for: {}", &image.path);
+
+    thumbnail = thumbnail.thumbnail(constants::THUMBNAIL_SIZE, constants::THUMBNAIL_SIZE);
+
+    let thumbnail_path = format!("{}.{}", &image.path, constants::THUMBNAIL_EXT);
+
+    info!("Saving thumbnail to: {}", &thumbnail_path);
+
+    thumbnail.save(&thumbnail_path)?;
 
     let mut context = tera::Context::new();
-    context.insert("path", &img_path.path);
+
+    context.insert("path", &image.path);
     context.insert("caption", &img_upload.caption);
+    context.insert("gallery_id", &gallery_id);
+    context.insert("image_id", &image.id);
+
     let image_item = constants::TEMPLATES.render("image_item.html", &context)?;
 
     Ok(content::RawHtml(image_item))
@@ -112,10 +144,57 @@ pub async fn get_gallery(
     Ok(content::RawHtml(gallery_html))
 }
 
+#[get("/galleries/<gallery_id>/lightbox/<image_id>")]
+pub async fn get_gallery_item(
+    db: &Db,
+    session: models::Session,
+    gallery_id: i64,
+    image_id: i64,
+) -> Result<content::RawHtml<String>, errors::AppError> {
+    let gallery = queries::get_gallery(db, gallery_id).await?;
+
+    let mut context = tera::Context::new();
+
+    let current_index = gallery
+        .images
+        .iter()
+        .position(|i| i.id == image_id)
+        .ok_or_else(|| errors::AppError {
+            message: "Image not found".to_string(),
+            code: Status::NotFound.code,
+        })? as i64;
+
+    let total_images = gallery.images.len() as i64;
+
+    let previous_index = (current_index - 1).rem_euclid(total_images);
+    let next_index = (current_index + 1).rem_euclid(total_images);
+
+    info!(
+        "current_index: {}, previous_index: {}, next_index: {}",
+        current_index, previous_index, next_index
+    );
+
+    context.insert(
+        "previous_image_id",
+        &gallery.images.get(previous_index as usize).map(|i| i.id),
+    );
+    context.insert("this_image", &gallery.images.get(current_index as usize));
+    context.insert(
+        "next_image_id",
+        &gallery.images.get(next_index as usize).map(|i| i.id),
+    );
+    context.insert("gallery_id", &gallery.id);
+
+    context.insert("user", &session.user);
+
+    let lightbox_html = constants::TEMPLATES.render("lightbox.html", &context)?;
+    Ok(content::RawHtml(lightbox_html))
+}
+
 #[delete("/galleries/<gallery_id>")]
 pub async fn delete_gallery(
     db: &Db,
-    session: models::Session,
+    _session: models::Session,
     gallery_id: i64,
 ) -> Result<content::RawHtml<String>, errors::AppError> {
     let gallery = queries::delete_gallery(db, gallery_id).await?;
@@ -124,9 +203,9 @@ pub async fn delete_gallery(
 
 #[put("/galleries/<gallery_id>", data = "<update>")]
 pub async fn update_gallery(
-    mut update: Form<models::GalleryUpdate<'_>>,
+    update: Form<models::GalleryUpdate<'_>>,
     db: &Db,
-    session: models::Session,
+    _session: models::Session,
     gallery_id: i64,
 ) -> Result<content::RawHtml<String>, errors::AppError> {
     let gallery = queries::update_gallery(db, gallery_id, update.into_inner()).await?;
