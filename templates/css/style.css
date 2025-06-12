@@ -193,64 +193,102 @@ button:hover {
 
 /* End of login */
 
-/ * Gallery */
+/* Gallery */
 
-div.gallery {
-  /* border: 1px solid #ccc; */
+/* Gallery grid container */
+#gallery {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+  grid-template-columns: repeat(4, minmax(0, 300px));
+  justify-content: center;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-div.gallery:hover {
-  opacity: 0.8;
+/* Responsive breakpoints for controlled column counts */
+@media (max-width: 576px) {
+  #gallery {
+    grid-template-columns: minmax(0, 300px);
+    gap: 15px;
+    padding: 15px;
+  }
 }
 
-div.gallery img:not(.clickable-icon) {
-  width: 100%;
-  display: block;
-  height: auto;
+@media (min-width: 577px) and (max-width: 768px) {
+  #gallery {
+    grid-template-columns: repeat(2, minmax(0, 300px));
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  #gallery {
+    grid-template-columns: repeat(3, minmax(0, 300px));
+  }
+}
+
+@media (min-width: 1201px) {
+  #gallery {
+    grid-template-columns: repeat(4, minmax(0, 300px));
+  }
+}
+
+/* Gallery item styles */
+.gallery-item {
+  background: var(--vanilla);
   border: 1px solid var(--black);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  max-width: 300px;
+}
+
+.gallery-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+}
+
+.gallery-item-footer {
+  padding: 12px;
+  background: var(--vanilla);
+  border-top: 1px solid var(--black);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gallery-item-caption {
+  font-size: 0.9em;
+  color: var(--black);
   margin: 0;
-  padding: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-div.gallery a {
-  margin: 0;
-  padding: 0;
+.gallery-item-delete {
+  margin-left: 10px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
 }
 
-.gallery-responsive {
-  padding: 0;
-  float: left;
-  width: 24.99999%;
-}
-
-@media only screen and (max-width: 900px) {
-  .gallery-responsive {
-    width: 33.333333%;
-    /* margin: 6px 0; */
-  }
-}
-
-@media only screen and (max-width: 700px) {
-  .gallery-responsive {
-    width: 49.99999%;
-    /* margin: 6px 0; */
-  }
-}
-
-@media only screen and (max-width: 500px) {
-  .gallery-responsive {
-    width: 100%;
-  }
+.gallery-item-delete:hover {
+  opacity: 1;
 }
 
 /* End of Gallery */
 
-/* Clear floats */
-.clearfix::after {
-  content: "";
-  clear: both;
-  display: table;
-}
+/* Removed clearfix - no longer needed with CSS Grid */
 
 
 /* Form */
@@ -499,46 +537,7 @@ input[type=file]::file-selector-button:hover {
   object-fit: fill;
 }
 
-/* Style for header & footer */
-.image-header, .image-footer {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    background: var(--black);
-    color: var(--vanilla);
-    text-align: center;
-    padding: 8px;
-    opacity: 0; /* Hidden initially */
-    transition: opacity 0.3s ease-in-out;
-}
-
-/* Position header at the top */
-.image-header {
-    top: 0;
-}
-
-.image-header .clickable-icon {
-  float: right;
-  color: var(--vanilla);
-}
-
-/* Position footer at the bottom */
-.image-footer {
-    bottom: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.gallery {
-  position: relative;
-}
-
-/* Show on hover */
-.gallery:hover .image-header,
-.gallery:hover .image-footer {
-    opacity: 1;
-}
+/* Removed complex image overlay styles - simplified design */
 
 .lightbox-container {
     position: relative;
