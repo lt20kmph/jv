@@ -18,14 +18,14 @@
 
 <div id="content" class="montserrat-body content">
   <div>
-    <div id='galleries'>
+    <div id='galleries' class="unified-grid">
       {% for gallery in galleries %}
       {{ macros::gallery_item(gallery=gallery) }}
       {% else %}
       <p>Hmm... Nothing here yet...</p>
       {% endfor %}
     </div>
-  </div
+  </div>
 </div>
 
 <script src="js/galleries.js"></script>

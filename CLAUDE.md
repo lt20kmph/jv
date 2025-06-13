@@ -74,3 +74,4 @@ This is a Rust web application using the Rocket framework for a photo blog/galle
 
 - You do not need to run the server to test the code, I am running the server locally and will provide you with feed back on your changes if you like.
 
+- The css is located in the templates dir
