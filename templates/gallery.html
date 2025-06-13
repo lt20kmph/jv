@@ -27,8 +27,6 @@
   <div id='gallery' class="unified-grid">
     {% for image in images %}
     {{ macros::image_item(path=image.path, caption=image.caption, image_id=image.id, gallery_id=gallery_id) }}
-    {% else %}
-    <p>Hmm... Nothing here yet...</p>
     {% endfor %}
     </div>
   </div>
