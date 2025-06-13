@@ -421,12 +421,12 @@ pub async fn get_galleries(db: &Db) -> Result<Vec<models::GalleryTile>, sqlx::Er
           galleries.id AS id,
           galleries.name AS name,
           galleries.time_created AS time_created,
-          count(*) AS n_images,
+          count(modified_images.id) AS n_images,
           max(modified_images.path) AS last_image,
           users.email AS created_by
         FROM galleries 
         LEFT JOIN original_images ON galleries.id = original_images.gallery_id
-        LEFT JOIN modified_images ON original_images.id = modified_images.original_image_id
+        LEFT JOIN modified_images ON original_images.id = modified_images.original_image_id AND modified_images.status = 'public'
         LEFT JOIN users ON galleries.user_id = users.id
         WHERE galleries.status != 'deleted'
         GROUP BY galleries.id, galleries.name, galleries.time_created
