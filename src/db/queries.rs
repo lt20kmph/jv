@@ -421,12 +421,12 @@ pub async fn get_galleries(db: &Db) -> Result<Vec<models::GalleryTile>, sqlx::Er
           galleries.id AS id,
           galleries.name AS name,
           galleries.time_created AS time_created,
-          count(*) AS n_images,
+          count(modified_images.id) AS n_images,
           max(modified_images.path) AS last_image,
           users.email AS created_by
         FROM galleries 
         LEFT JOIN original_images ON galleries.id = original_images.gallery_id
-        LEFT JOIN modified_images ON original_images.id = modified_images.original_image_id
+        LEFT JOIN modified_images ON original_images.id = modified_images.original_image_id AND modified_images.status = 'public'
         LEFT JOIN users ON galleries.user_id = users.id
         WHERE galleries.status != 'deleted'
         GROUP BY galleries.id, galleries.name, galleries.time_created
@@ -575,6 +575,24 @@ pub async fn delete_image(db: &Db, image_id: i64) -> Result<(), sqlx::Error> {
         UPDATE modified_images SET status = 'deleted' WHERE id = ?1
         "#,
     )
+    .bind(image_id)
+    .execute(&db.0)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn update_image_caption(
+    db: &Db,
+    image_id: i64,
+    caption: &str,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        UPDATE modified_images SET caption = ?1, time_modified = CURRENT_TIMESTAMP WHERE id = ?2
+        "#,
+    )
+    .bind(caption)
     .bind(image_id)
     .execute(&db.0)
     .await?;
