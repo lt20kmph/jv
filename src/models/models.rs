@@ -31,6 +31,11 @@ pub struct GalleryUpdate<'f> {
 }
 
 #[derive(FromForm)]
+pub struct CaptionUpdate<'f> {
+    pub caption: &'f str,
+}
+
+#[derive(FromForm)]
 pub struct CreateGallery<'f> {
     pub name: Option<&'f str>,
 }
