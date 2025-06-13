@@ -4,6 +4,9 @@
 {% block body %}
 
 <ul class="concert-one-regular navbar">
+  <li>
+    <a href="/galleries"><- Back to Galleries</a>
+  </li>
   {% if user.role =='Writer' %}
   <li>
     <a hx-get="/galleries/{{gallery_id}}/upload_form" hx-target="#upload_form"
