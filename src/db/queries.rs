@@ -581,3 +581,21 @@ pub async fn delete_image(db: &Db, image_id: i64) -> Result<(), sqlx::Error> {
 
     Ok(())
 }
+
+pub async fn update_image_caption(
+    db: &Db,
+    image_id: i64,
+    caption: &str,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        UPDATE modified_images SET caption = ?1, time_modified = CURRENT_TIMESTAMP WHERE id = ?2
+        "#,
+    )
+    .bind(caption)
+    .bind(image_id)
+    .execute(&db.0)
+    .await?;
+
+    Ok(())
+}
