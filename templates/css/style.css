@@ -301,8 +301,8 @@ button:hover {
 }
 
 /* Gallery-specific styles within unified tiles */
-.unified-tile .editable-title {
-  margin-bottom: 10px;
+.unified-tile .editable-text {
+  margin-bottom: 0;
 }
 
 .unified-tile .details {
@@ -448,7 +448,7 @@ input[type=file]::file-selector-button:hover {
   text-decoration: none;
 }
 
-.editable-title {
+.editable-text {
   position: relative;
   display: inline-block; /* Ensures the title and icon are treated as one block */
   width: 100%; /* Ensures the title takes up the full width */
@@ -474,7 +474,7 @@ input[type=file]::file-selector-button:hover {
   cursor: pointer; /* Show pointer cursor when hovering */
 }
 
-.editable-title:hover .edit-icon {
+.editable-text:hover .edit-icon {
   display: inline; /* Show the pen icon when hovering over the container */
 }
 
@@ -505,7 +505,27 @@ input[type=file]::file-selector-button:hover {
   font-family: inherit;
   font-family: sans-serif;
   letter-spacing: 0.5px;
+}
+
+.caption-text {
+  color: #555;
+  font-size: 0.9em;
+}
+
+.caption-text:hover {
+  background-color: var(--blue);
+}
+
+.caption-text-input {
+  background-color: var(--blue);
+  border: 0;
+  outline: 0;
+  font-size: 0.9em;
   color: var(--black);
+  text-align: left;
+  margin: 0;
+  font-family: inherit;
+  font-family: sans-serif;
 }
 
 .gallery-placeholder {

@@ -28,9 +28,44 @@ function updateGalleryEmptyState() {
   }
 }
 
+// Add event listeners for editable text (same as galleries.js)
+const addEditableTextListeners = () => {
+  document.querySelectorAll(".edit-icon").forEach((editIcon) => {
+    editIcon.addEventListener("click", function () {
+      const editableText = editIcon.closest(".editable-text");
+      const textElement = editableText.querySelector(".gallery-title, .caption-text");
+      const inputElement = editableText.querySelector(".gallery-title-input, .caption-text-input");
+      
+      textElement.classList.toggle("hidden");
+      inputElement.classList.toggle("hidden");
+      if (textElement.classList.contains("hidden")) {
+        inputElement.value = textElement.textContent;
+        inputElement.focus();
+      } else {
+        textElement.textContent = inputElement.value;
+      }
+    });
+  });
+  
+  document.querySelectorAll(".gallery-title-input, .caption-text-input").forEach((input) => {
+    input.addEventListener("keyup", function (event) {
+      const editableText = input.closest(".editable-text");
+      const textElement = editableText.querySelector(".gallery-title, .caption-text");
+      
+      if (event.key === "Enter") {
+        textElement.textContent = input.value;
+        input.blur();
+        input.classList.toggle("hidden");
+        textElement.classList.toggle("hidden");
+      }
+    });
+  });
+};
+
 // Initialize empty state on page load and set up observer
 document.addEventListener('DOMContentLoaded', function() {
   updateGalleryEmptyState();
+  addEditableTextListeners();
   
   // Set up MutationObserver to watch for changes in the gallery
   const gallery = document.getElementById('gallery');
@@ -44,6 +79,8 @@ document.addEventListener('DOMContentLoaded', function() {
       
       if (hasChildListMutation) {
         updateGalleryEmptyState();
+        // Re-add event listeners for any new editable elements
+        addEditableTextListeners();
       }
     });
     

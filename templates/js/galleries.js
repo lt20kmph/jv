@@ -1,32 +1,31 @@
 const addEventListeners = () => {
   document.querySelectorAll(".edit-icon").forEach((editIcon) => {
     editIcon.addEventListener("click", function () {
-      const title = editIcon
-        .closest(".editable-title")
-        .querySelector(".gallery-title");
-      const input = editIcon
-        .closest(".editable-title")
-        .querySelector(".gallery-title-input");
-      title.classList.toggle("hidden");
-      input.classList.toggle("hidden");
-      if (title.classList.contains("hidden")) {
-        input.value = title.textContent;
-        input.focus();
+      const editableText = editIcon.closest(".editable-text");
+      const textElement = editableText.querySelector(".gallery-title, .caption-text");
+      const inputElement = editableText.querySelector(".gallery-title-input, .caption-text-input");
+      
+      textElement.classList.toggle("hidden");
+      inputElement.classList.toggle("hidden");
+      if (textElement.classList.contains("hidden")) {
+        inputElement.value = textElement.textContent;
+        inputElement.focus();
       } else {
-        title.textContent = input.value;
+        textElement.textContent = inputElement.value;
       }
     });
   });
-  document.querySelectorAll(".gallery-title-input").forEach((input) => {
+  
+  document.querySelectorAll(".gallery-title-input, .caption-text-input").forEach((input) => {
     input.addEventListener("keyup", function (event) {
-      const title = input
-        .closest(".editable-title")
-        .querySelector(".gallery-title");
+      const editableText = input.closest(".editable-text");
+      const textElement = editableText.querySelector(".gallery-title, .caption-text");
+      
       if (event.key === "Enter") {
-        title.textContent = input.value;
+        textElement.textContent = input.value;
         input.blur();
         input.classList.toggle("hidden");
-        title.classList.toggle("hidden");
+        textElement.classList.toggle("hidden");
       }
     });
   });
