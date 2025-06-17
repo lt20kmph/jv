@@ -3,6 +3,7 @@ use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
 use crate::models::models::UserLogin;
+use crate::tera_utils;
 
 use rocket::form::Form;
 use rocket::get;
@@ -13,7 +14,7 @@ use rocket::response::Redirect;
 
 #[get("/login")]
 pub async fn get() -> Result<content::RawHtml<String>, errors::AppError> {
-    let login = constants::TEMPLATES.render("login.html", &tera::Context::new())?;
+    let login = tera_utils::render_template_with_logging("login.html", &tera::Context::new())?;
     Ok(content::RawHtml(login))
 }
 

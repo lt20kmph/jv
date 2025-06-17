@@ -20,6 +20,7 @@ mod routes {
     pub mod login;
     pub mod signup;
 }
+mod tera_utils;
 
 use db::queries;
 use db::queries::Db;

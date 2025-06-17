@@ -3,6 +3,7 @@ use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
 use crate::models::models;
+use crate::tera_utils;
 use image::ImageReader;
 
 use log::info;
@@ -13,7 +14,6 @@ use rocket::{delete, get, post, put};
 
 #[post("/galleries", data = "<create_gallery>")]
 pub async fn post(
-    
     create_gallery: Form<models::CreateGallery<'_>>,
     session: models::Session,
     db: &Db,
@@ -38,7 +38,7 @@ pub async fn post(
 
     let mut context = tera::Context::new();
     context.insert("gallery", &gallery);
-    let new_gallery = constants::TEMPLATES.render("new_gallery.html", &context)?;
+    let new_gallery = tera_utils::render_template_with_logging("new_gallery.html", &context)?;
 
     Ok(content::RawHtml(new_gallery))
 }
@@ -107,7 +107,7 @@ pub async fn post_img(
     context.insert("gallery_id", &gallery_id);
     context.insert("image_id", &image.id);
 
-    let image_item = constants::TEMPLATES.render("image_item.html", &context)?;
+    let image_item = tera_utils::render_template_with_logging("image_item.html", &context)?;
 
     Ok(content::RawHtml(image_item))
 }
@@ -123,7 +123,7 @@ pub async fn get(
     context.insert("galleries", &galleries);
     context.insert("user", &session.user);
 
-    let galleries_html = constants::TEMPLATES.render("galleries.html", &context)?;
+    let galleries_html = tera_utils::render_template_with_logging("galleries.html", &context)?;
     Ok(content::RawHtml(galleries_html))
 }
 
@@ -140,7 +140,7 @@ pub async fn get_gallery(
     context.insert("images", &gallery.images);
     context.insert("user", &session.user);
 
-    let gallery_html = constants::TEMPLATES.render("gallery.html", &context)?;
+    let gallery_html = tera_utils::render_template_with_logging("gallery.html", &context)?;
     Ok(content::RawHtml(gallery_html))
 }
 
@@ -187,7 +187,7 @@ pub async fn get_gallery_item(
 
     context.insert("user", &session.user);
 
-    let lightbox_html = constants::TEMPLATES.render("lightbox.html", &context)?;
+    let lightbox_html = tera_utils::render_template_with_logging("lightbox.html", &context)?;
     Ok(content::RawHtml(lightbox_html))
 }
 
@@ -223,6 +223,6 @@ pub async fn get_upload_form(
     let mut context = tera::Context::new();
     context.insert("gallery_id", &gallery_id);
 
-    let upload_form = constants::TEMPLATES.render("upload_form.html", &context)?;
+    let upload_form = tera_utils::render_template_with_logging("upload_form.html", &context)?;
     Ok(content::RawHtml(upload_form))
 }

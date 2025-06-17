@@ -3,6 +3,7 @@ use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
 use crate::models::models::UserSignup;
+use crate::tera_utils;
 use log::info;
 use reqwest;
 use rocket::form::Form;
@@ -52,7 +53,7 @@ async fn send_email(
 
 #[get("/signup")]
 pub async fn get() -> Result<content::RawHtml<String>, errors::AppError> {
-    let signup = constants::TEMPLATES.render("signup.html", &tera::Context::new())?;
+    let signup = tera_utils::render_template_with_logging("signup.html", &tera::Context::new())?;
     Ok(content::RawHtml(signup))
 }
 
@@ -69,7 +70,7 @@ pub async fn post(
     context.insert("verification_link", &verification_link);
     context.insert("new_user_email", &user_signup.email);
 
-    let email_body = constants::TEMPLATES.render("verify_signup.html", &context)?;
+    let email_body = tera_utils::render_template_with_logging("verify_signup.html", &context)?;
     let admin_email = env::var("JV_ADMIN_EMAIL").expect("JV_ADMIN_EMAIL must be set");
 
     send_email(
@@ -80,7 +81,7 @@ pub async fn post(
     )
     .await?;
 
-    let html = constants::TEMPLATES.render("awaiting_verification.html", &tera::Context::new())?;
+    let html = tera_utils::render_template_with_logging("awaiting_verification.html", &tera::Context::new())?;
     Ok(content::RawHtml(html))
 }
 
@@ -97,7 +98,7 @@ pub async fn verify(
     let mut context = tera::Context::new();
     context.insert("login_link", &login_link);
 
-    let email_body = constants::TEMPLATES.render("welcome.html", &context)?;
+    let email_body = tera_utils::render_template_with_logging("welcome.html", &context)?;
 
     send_email(
         &email,
