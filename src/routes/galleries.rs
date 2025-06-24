@@ -136,8 +136,7 @@ pub async fn get_gallery(
     let gallery = queries::get_gallery(db, gallery_id).await?;
 
     let mut context = tera::Context::new();
-    context.insert("gallery_id", &gallery_id);
-    context.insert("images", &gallery.images);
+    context.insert("gallery", &gallery);
     context.insert("user", &session.user);
 
     let gallery_html = tera_utils::render_template_with_logging("gallery.html", &context)?;

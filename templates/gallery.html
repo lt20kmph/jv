@@ -9,12 +9,15 @@
   </li>
   {% if user.role =='Writer' %}
   <li>
-    <a hx-get="/galleries/{{gallery_id}}/upload_form" hx-target="#upload_form"
+    <a hx-get="/galleries/{{gallery.id}}/upload_form" hx-target="#upload_form"
       hx-on:htmx:before-request="beforeUploadFormRequest();">
       + Upload pictures
     </a>
   </li>
   {% endif %}
+  <li class="gallery-title-nav">
+    <span>/ {{gallery.name}}</span>
+  </li>
   <li style="float:right">
     <a class="active" hx-get="/about.html" hx-target="#content">About</a>
   </li>
@@ -25,8 +28,8 @@
 <div id="content" class="montserrat-body content">
   <div>
   <div id='gallery' class="unified-grid">
-    {% for image in images %}
-    {{ macros::image_item(path=image.path, caption=image.caption, image_id=image.id, gallery_id=gallery_id) }}
+    {% for image in gallery.images %}
+    {{ macros::image_item(path=image.path, caption=image.caption, image_id=image.id, gallery_id=gallery.id) }}
     {% endfor %}
     </div>
   </div>

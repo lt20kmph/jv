@@ -78,6 +78,21 @@ li a:hover {
   margin: 0;
 }
 
+.gallery-title-nav {
+  float: left;
+}
+
+.gallery-title-nav span {
+  display: block;
+  color: var(--vanilla);
+  text-align: center;
+  padding: 7px 8px;
+  margin: 7px 8px;
+  border-radius: 4px;
+  font-style: italic;
+  opacity: 0.9;
+}
+
 .montserrat-body {
   font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;
