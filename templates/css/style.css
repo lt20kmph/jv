@@ -448,84 +448,121 @@ input[type=file]::file-selector-button:hover {
   text-decoration: none;
 }
 
+/* Editable Text Component */
 .editable-text {
   position: relative;
-  display: inline-block; /* Ensures the title and icon are treated as one block */
-  width: 100%; /* Ensures the title takes up the full width */
-  text-align: left; /* Aligns the title to the left */
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 24px 2px 2px; /* Space for edit icon */
+  transition: all 0.2s ease;
+  margin: 0;
 }
 
-.title {
-  display: inline-block; /* Keeps the text left-aligned */
-  margin-right: 8px; /* Adds space for the pen when it appears */
+.editable-text:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: none;
+}
+
+.editable-text .title,
+.editable-text span,
+.editable-text div,
+.editable-text h2 {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .edit-icon {
   position: absolute;
-  right: 0; /* Aligns the pen to the right of the container */
-  top: 50%; /* Centers it vertically */
-  transform: translateY(-50%); /* Perfect vertical alignment */
-  display: none; /* Hide the pen by default */
-  cursor: pointer; /* Show pointer cursor when hovering */
-  font-size: 1.3em; /* Adjust the size of the pen icon */
-}
-
-.clickable-icon {
-  cursor: pointer; /* Show pointer cursor when hovering */
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
 }
 
 .editable-text:hover .edit-icon {
-  display: inline; /* Show the pen icon when hovering over the container */
+  opacity: 0.6;
+}
+
+.editable-text:hover .edit-icon:hover {
+  opacity: 1;
+}
+
+.clickable-icon {
+  cursor: pointer;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
+/* Gallery Title Styles */
 .gallery-title {
   font-size: 1.5em;
   font-weight: bold;
-  margin: 0 0 10px;
   color: #333;
   text-align: left;
 }
 
-.gallery-title:hover {
-  background-color: var(--blue);
-}
-
 .gallery-title-input {
-  background-color: var(--blue);
-  border: 0;
-  outline: 0;
+  background-color: var(--vanilla);
+  border: 2px solid var(--blue);
+  border-radius: 4px;
+  outline: none;
   font-size: 1.5em;
   font-weight: 700;
   text-align: left;
-  margin: 0;
+  padding: 4px 8px;
+  margin: -2px;
   font-family: inherit;
-  font-family: sans-serif;
+  color: var(--black);
   letter-spacing: 0.5px;
+  width: 100%;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
+.gallery-title-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Caption Text Styles */
 .caption-text {
   color: #555;
   font-size: 0.9em;
 }
 
-.caption-text:hover {
-  background-color: var(--blue);
-}
-
 .caption-text-input {
-  background-color: var(--blue);
-  border: 0;
-  outline: 0;
+  background-color: var(--vanilla);
+  border: 2px solid var(--blue);
+  border-radius: 4px;
+  outline: none;
   font-size: 0.9em;
   color: var(--black);
   text-align: left;
-  margin: 0;
+  padding: 4px 8px;
+  margin: -2px;
   font-family: inherit;
-  font-family: sans-serif;
+  width: 100%;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.caption-text-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 .gallery-placeholder {
