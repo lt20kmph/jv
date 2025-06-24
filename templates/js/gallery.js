@@ -80,6 +80,21 @@ const addEditableTextListeners = () => {
           updateTooltips();
         }
       });
+
+      // Add blur event listener to handle clicking outside
+      input.addEventListener("blur", function (event) {
+        const editableText = input.closest(".editable-text");
+        const textElement = editableText.querySelector(
+          ".gallery-title, .caption-text",
+        );
+
+        // Exit edit mode when clicking outside
+        textElement.textContent = input.value;
+        input.classList.add("hidden");
+        textElement.classList.remove("hidden");
+        // Update tooltip after text change
+        updateTooltips();
+      });
     });
 
   // Initialize tooltips for editable text elements
