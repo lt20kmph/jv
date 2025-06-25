@@ -89,6 +89,6 @@ fn rocket() -> _ {
     env_logger::init();
     rocket::build()
         .attach(stage())
-        .register("/", catchers![catchers::not_authorized])
+        .register("/", catchers![catchers::not_authorized, catchers::forbidden])
         .mount("/", FileServer::from(relative!("static")))
 }
