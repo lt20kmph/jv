@@ -108,6 +108,7 @@ pub async fn post_img(
     context.insert("caption", &img_upload.caption);
     context.insert("gallery_id", &gallery_id);
     context.insert("image_id", &image.id);
+    context.insert("user", writer_session.user());
 
     let image_item = tera_utils::render_template_with_logging("image_item.html", &context)?;
 
