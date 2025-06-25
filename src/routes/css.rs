@@ -1,5 +1,6 @@
 use crate::constants;
 use crate::errors;
+use crate::tera_utils;
 use rocket::get;
 use rocket::response::content;
 
@@ -10,6 +11,6 @@ pub async fn get(style_name: &str) -> Result<content::RawCss<String>, errors::Ap
         context.insert(*name, color);
     }
     let path = format!("css/{}", style_name);
-    let style = constants::TEMPLATES.render(&path, &context)?;
+    let style = tera_utils::render_template_with_logging(&path, &context)?;
     Ok(content::RawCss(style))
 }

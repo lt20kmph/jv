@@ -21,15 +21,9 @@ body {
 .content {
   margin: 20px;
   display: flex;
-  justify-content: left;
+  justify-content: center;
 }
 
-#galleries {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 20px;
-}
 
 .horizontal-container {
   display: flex; /* Use Flexbox */
@@ -82,6 +76,21 @@ li a:hover {
 .navbar {
   width: 100%;
   margin: 0;
+}
+
+.gallery-title-nav {
+  float: left;
+}
+
+.gallery-title-nav span {
+  display: block;
+  color: var(--vanilla);
+  text-align: center;
+  padding: 7px 8px;
+  margin: 7px 8px;
+  border-radius: 4px;
+  font-style: italic;
+  opacity: 0.9;
 }
 
 .montserrat-body {
@@ -193,64 +202,139 @@ button:hover {
 
 /* End of login */
 
-/ * Gallery */
-
-div.gallery {
-  /* border: 1px solid #ccc; */
-}
-
-div.gallery:hover {
-  opacity: 0.8;
-}
-
-div.gallery img:not(.clickable-icon) {
-  width: 100%;
-  display: block;
-  height: auto;
-  border: 1px solid var(--black);
-  margin: 0;
-  padding: 0;
-}
-
-div.gallery a {
-  margin: 0;
-  padding: 0;
-}
-
-.gallery-responsive {
-  padding: 0;
-  float: left;
-  width: 24.99999%;
-}
-
-@media only screen and (max-width: 900px) {
-  .gallery-responsive {
-    width: 33.333333%;
-    /* margin: 6px 0; */
-  }
-}
-
-@media only screen and (max-width: 700px) {
-  .gallery-responsive {
-    width: 49.99999%;
-    /* margin: 6px 0; */
-  }
-}
-
-@media only screen and (max-width: 500px) {
-  .gallery-responsive {
-    width: 100%;
-  }
-}
+/* Gallery - Legacy styles removed, now using unified system */
 
 /* End of Gallery */
 
-/* Clear floats */
-.clearfix::after {
-  content: "";
-  clear: both;
-  display: table;
+/* Unified Grid System */
+
+/* Unified grid container */
+.unified-grid {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+  grid-template-columns: repeat(4, minmax(0, 300px));
+  justify-content: center;
+  max-width: 1400px;
+  margin: 0 auto;
 }
+
+/* Responsive breakpoints for unified grid */
+@media (max-width: 576px) {
+  .unified-grid {
+    grid-template-columns: minmax(0, 300px);
+    gap: 15px;
+    padding: 15px;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .unified-grid {
+    grid-template-columns: repeat(2, minmax(0, 300px));
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .unified-grid {
+    grid-template-columns: repeat(3, minmax(0, 300px));
+  }
+}
+
+@media (min-width: 1201px) {
+  .unified-grid {
+    grid-template-columns: repeat(4, minmax(0, 300px));
+  }
+}
+
+/* Unified tile styles */
+.unified-tile {
+  background: var(--vanilla);
+  border: 1px solid var(--black);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.unified-tile:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.unified-tile-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.unified-tile-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+}
+
+.unified-tile-image img.gallery-placeholder {
+  padding: 25px;
+  object-fit: fill;
+}
+
+.unified-tile-content {
+  padding: 12px;
+  background: var(--vanilla);
+  border-top: 1px solid var(--black);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Unified tile caption for images */
+.unified-tile-caption {
+  font-size: 0.9em;
+  color: var(--black);
+  margin: 0 0 10px 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Unified tile delete button for images */
+.unified-tile-delete {
+  align-self: flex-end;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.unified-tile-delete:hover {
+  opacity: 1;
+}
+
+/* Gallery-specific styles within unified tiles */
+.unified-tile .editable-text {
+  margin-bottom: 0;
+}
+
+.unified-tile .details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  color: #555;
+  padding: 5px 0;
+}
+
+.unified-tile .details span {
+  display: block;
+}
+
+/* End of Unified Grid System */
+
+/* Removed clearfix - no longer needed with CSS Grid */
 
 
 /* Form */
@@ -374,122 +458,126 @@ input[type=file]::file-selector-button:hover {
 }
 /* End of Form */
 
-.gallery-tile {
-  display: flex;
-  flex: 1 1 calc(33.333% - 16px); /* Set the width to 1/3 minus the gap */
-  flex-direction: column;
-  width: 300px;
-  border: 2px solid var(--black);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-  background-color: var(--vanilla);
-  max-width: 350px;
-  min-width: 350px;
-}
-
-.image-container {
-  width: 100%;
-  height: 200px;
-  overflow: hidden;
-  background-color: var(--blue);
-}
-
-.image-container:hover {
-  opacity: 0.8;
-}
-
-.image-container img:not(.gallery-placeholder) {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.info-container {
-  padding: 15px;
-  text-align: center;
-}
-
-.gallery-title {
-  font-size: 1.5em;
-  font-weight: bold;
-  margin: 0 0 10px;
-  color: #333;
-  text-align: left;
-}
-
-.gallery-title:hover {
-  background-color: var(--blue);
-}
-
-.title-details {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.details {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9em;
-  color: #555;
-  padding: 5px 0;
-}
-
-.details span {
-  display: block;
-}
 
 .no-underline {
   text-decoration: none;
 }
 
-.editable-title {
+/* Editable Text Component */
+.editable-text {
   position: relative;
-  display: inline-block; /* Ensures the title and icon are treated as one block */
-  width: 100%; /* Ensures the title takes up the full width */
-  text-align: left; /* Aligns the title to the left */
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 24px 2px 2px; /* Space for edit icon */
+  transition: all 0.2s ease;
+  margin: 0;
 }
 
-.title {
-  display: inline-block; /* Keeps the text left-aligned */
-  margin-right: 8px; /* Adds space for the pen when it appears */
+.editable-text:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: none;
+}
+
+.editable-text .title,
+.editable-text span,
+.editable-text div,
+.editable-text h2 {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .edit-icon {
   position: absolute;
-  right: 0; /* Aligns the pen to the right of the container */
-  top: 50%; /* Centers it vertically */
-  transform: translateY(-50%); /* Perfect vertical alignment */
-  display: none; /* Hide the pen by default */
-  cursor: pointer; /* Show pointer cursor when hovering */
-  font-size: 1.3em; /* Adjust the size of the pen icon */
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
+
+.editable-text:hover .edit-icon {
+  opacity: 0.6;
+}
+
+.editable-text:hover .edit-icon:hover {
+  opacity: 1;
 }
 
 .clickable-icon {
-  cursor: pointer; /* Show pointer cursor when hovering */
-}
-
-.editable-title:hover .edit-icon {
-  display: inline; /* Show the pen icon when hovering over the container */
+  cursor: pointer;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
+}
+
+/* Gallery Title Styles */
+.gallery-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #333;
+  text-align: left;
 }
 
 .gallery-title-input {
-  background-color: var(--blue);
-  border: 0;
-  outline: 0;
+  background-color: var(--vanilla);
+  border: 2px solid var(--blue);
+  border-radius: 4px;
+  outline: none;
   font-size: 1.5em;
   font-weight: 700;
   text-align: left;
-  margin: 0;
+  padding: 4px 8px;
+  margin: -2px;
   font-family: inherit;
-  font-family: sans-serif;
-  letter-spacing: 0.5px;
   color: var(--black);
+  letter-spacing: 0.5px;
+  width: 100%;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.gallery-title-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Caption Text Styles */
+.caption-text {
+  color: #555;
+  font-size: 0.9em;
+}
+
+.caption-text-input {
+  background-color: var(--vanilla);
+  border: 2px solid var(--blue);
+  border-radius: 4px;
+  outline: none;
+  font-size: 0.9em;
+  color: var(--black);
+  text-align: left;
+  padding: 4px 8px;
+  margin: -2px;
+  font-family: inherit;
+  width: 100%;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.caption-text-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 .gallery-placeholder {
@@ -499,46 +587,7 @@ input[type=file]::file-selector-button:hover {
   object-fit: fill;
 }
 
-/* Style for header & footer */
-.image-header, .image-footer {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    background: var(--black);
-    color: var(--vanilla);
-    text-align: center;
-    padding: 8px;
-    opacity: 0; /* Hidden initially */
-    transition: opacity 0.3s ease-in-out;
-}
-
-/* Position header at the top */
-.image-header {
-    top: 0;
-}
-
-.image-header .clickable-icon {
-  float: right;
-  color: var(--vanilla);
-}
-
-/* Position footer at the bottom */
-.image-footer {
-    bottom: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.gallery {
-  position: relative;
-}
-
-/* Show on hover */
-.gallery:hover .image-header,
-.gallery:hover .image-footer {
-    opacity: 1;
-}
+/* Removed complex image overlay styles - simplified design */
 
 .lightbox-container {
     position: relative;

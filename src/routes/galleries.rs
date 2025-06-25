@@ -2,7 +2,9 @@ use crate::constants;
 use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
+use crate::middleware::WriterSession;
 use crate::models::models;
+use crate::tera_utils;
 use image::ImageReader;
 
 use log::info;
@@ -13,9 +15,8 @@ use rocket::{delete, get, post, put};
 
 #[post("/galleries", data = "<create_gallery>")]
 pub async fn post(
-    
     create_gallery: Form<models::CreateGallery<'_>>,
-    session: models::Session,
+    writer_session: WriterSession,
     db: &Db,
 ) -> Result<content::RawHtml<String>, errors::AppError> {
     let gallery_name = create_gallery.name;
@@ -25,7 +26,7 @@ pub async fn post(
         None => "Untitled",
     };
 
-    let gallery_id = queries::create_gallery(db, session.user.id, gallery_name).await?;
+    let gallery_id = queries::create_gallery(db, writer_session.user().id, gallery_name).await?;
 
     let gallery = models::GalleryTile::new(
         gallery_id,
@@ -33,12 +34,12 @@ pub async fn post(
         None,
         0,
         chrono::Utc::now().to_string(),
-        session.user.email.to_string(),
+        writer_session.user().email.to_string(),
     );
 
     let mut context = tera::Context::new();
     context.insert("gallery", &gallery);
-    let new_gallery = constants::TEMPLATES.render("new_gallery.html", &context)?;
+    let new_gallery = tera_utils::render_template_with_logging("new_gallery.html", &context)?;
 
     Ok(content::RawHtml(new_gallery))
 }
@@ -46,7 +47,7 @@ pub async fn post(
 #[post("/galleries/<gallery_id>", data = "<img_upload>")]
 pub async fn post_img(
     mut img_upload: Form<models::ImgUpload<'_>>,
-    session: models::Session,
+    writer_session: WriterSession,
     gallery_id: i64,
     db: &Db,
 ) -> Result<content::RawHtml<String>, errors::AppError> {
@@ -64,7 +65,7 @@ pub async fn post_img(
 
     let image = queries::create_image(
         db,
-        session.user.id,
+        writer_session.user().id,
         gallery_id,
         original_path,
         img_upload.caption,
@@ -107,7 +108,7 @@ pub async fn post_img(
     context.insert("gallery_id", &gallery_id);
     context.insert("image_id", &image.id);
 
-    let image_item = constants::TEMPLATES.render("image_item.html", &context)?;
+    let image_item = tera_utils::render_template_with_logging("image_item.html", &context)?;
 
     Ok(content::RawHtml(image_item))
 }
@@ -123,7 +124,7 @@ pub async fn get(
     context.insert("galleries", &galleries);
     context.insert("user", &session.user);
 
-    let galleries_html = constants::TEMPLATES.render("galleries.html", &context)?;
+    let galleries_html = tera_utils::render_template_with_logging("galleries.html", &context)?;
     Ok(content::RawHtml(galleries_html))
 }
 
@@ -136,11 +137,10 @@ pub async fn get_gallery(
     let gallery = queries::get_gallery(db, gallery_id).await?;
 
     let mut context = tera::Context::new();
-    context.insert("gallery_id", &gallery_id);
-    context.insert("images", &gallery.images);
+    context.insert("gallery", &gallery);
     context.insert("user", &session.user);
 
-    let gallery_html = constants::TEMPLATES.render("gallery.html", &context)?;
+    let gallery_html = tera_utils::render_template_with_logging("gallery.html", &context)?;
     Ok(content::RawHtml(gallery_html))
 }
 
@@ -187,14 +187,14 @@ pub async fn get_gallery_item(
 
     context.insert("user", &session.user);
 
-    let lightbox_html = constants::TEMPLATES.render("lightbox.html", &context)?;
+    let lightbox_html = tera_utils::render_template_with_logging("lightbox.html", &context)?;
     Ok(content::RawHtml(lightbox_html))
 }
 
 #[delete("/galleries/<gallery_id>")]
 pub async fn delete_gallery(
     db: &Db,
-    _session: models::Session,
+    _writer_session: WriterSession,
     gallery_id: i64,
 ) -> Result<content::RawHtml<String>, errors::AppError> {
     let gallery = queries::delete_gallery(db, gallery_id).await?;
@@ -205,7 +205,7 @@ pub async fn delete_gallery(
 pub async fn update_gallery(
     update: Form<models::GalleryUpdate<'_>>,
     db: &Db,
-    _session: models::Session,
+    _writer_session: WriterSession,
     gallery_id: i64,
 ) -> Result<content::RawHtml<String>, errors::AppError> {
     let gallery = queries::update_gallery(db, gallery_id, update.into_inner()).await?;
@@ -223,6 +223,6 @@ pub async fn get_upload_form(
     let mut context = tera::Context::new();
     context.insert("gallery_id", &gallery_id);
 
-    let upload_form = constants::TEMPLATES.render("upload_form.html", &context)?;
+    let upload_form = tera_utils::render_template_with_logging("upload_form.html", &context)?;
     Ok(content::RawHtml(upload_form))
 }

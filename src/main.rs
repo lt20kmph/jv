@@ -20,6 +20,7 @@ mod routes {
     pub mod login;
     pub mod signup;
 }
+mod tera_utils;
 
 use db::queries;
 use db::queries::Db;
@@ -69,6 +70,7 @@ fn stage() -> AdHoc {
                     galleries::get_gallery_item,
                     img::delete,
                     img::get,
+                    img::update_caption,
                     login::post,
                     login::get,
                     signup::post,
@@ -87,6 +89,6 @@ fn rocket() -> _ {
     env_logger::init();
     rocket::build()
         .attach(stage())
-        .register("/", catchers![catchers::not_authorized])
+        .register("/", catchers![catchers::not_authorized, catchers::forbidden])
         .mount("/", FileServer::from(relative!("static")))
 }

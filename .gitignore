@@ -33,3 +33,8 @@ Rocket.toml
 
 # Env
 .env
+
+# Claude stuff
+.claude.json
+.config/**
+.claude/**

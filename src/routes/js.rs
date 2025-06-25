@@ -1,5 +1,6 @@
 use crate::constants;
 use crate::errors;
+use crate::tera_utils;
 use rocket::get;
 use rocket::response::content;
 
@@ -9,6 +10,6 @@ pub async fn get(
 ) -> Result<content::RawJavaScript<String>, errors::AppError> {
     let context = tera::Context::new();
     let path = format!("js/{}", script_name);
-    let js = constants::TEMPLATES.render(&path, &context)?;
+    let js = tera_utils::render_template_with_logging(&path, &context)?;
     Ok(content::RawJavaScript(js))
 }
