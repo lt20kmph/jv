@@ -39,6 +39,7 @@ pub async fn post(
 
     let mut context = tera::Context::new();
     context.insert("gallery", &gallery);
+    context.insert("user", writer_session.user());
     let new_gallery = tera_utils::render_template_with_logging("new_gallery.html", &context)?;
 
     Ok(content::RawHtml(new_gallery))
