@@ -30,33 +30,35 @@ function updateGalleryEmptyState() {
 
 // Add event listeners for editable text (same as galleries.js)
 const addEditableTextListeners = () => {
-  // Add click listeners only to editable-text containers that don't already have listeners
+  // Add click listeners only to editable-text containers that have input elements (Writer role)
   document.querySelectorAll(".editable-text:not([data-listeners-added])").forEach((editableText) => {
-    // Mark as having listeners to prevent duplicates
-    editableText.setAttribute("data-listeners-added", "true");
+    const inputElement = editableText.querySelector(
+      ".gallery-title-input, .caption-text-input",
+    );
     
-    editableText.addEventListener("click", function (event) {
-      const textElement = editableText.querySelector(
-        ".gallery-title, .caption-text",
-      );
-      const inputElement = editableText.querySelector(
-        ".gallery-title-input, .caption-text-input",
-      );
+    // Only add listeners if input element exists (Writer role)
+    if (inputElement) {
+      // Mark as having listeners to prevent duplicates
+      editableText.setAttribute("data-listeners-added", "true");
+      
+      editableText.addEventListener("click", function (event) {
+        const textElement = editableText.querySelector(
+          ".gallery-title, .caption-text",
+        );
 
-      // Prevent multiple event handlers from firing
-      event.stopPropagation();
+        // Prevent multiple event handlers from firing
+        event.stopPropagation();
 
-      textElement.classList.toggle("hidden");
-      inputElement.classList.toggle("hidden");
-      if (textElement.classList.contains("hidden")) {
-        inputElement.value = textElement.textContent;
-        inputElement.focus();
-      } else {
-        textElement.textContent = inputElement.value;
-        // Update tooltip after text change
-        updateTooltips();
-      }
-    });
+        textElement.classList.toggle("hidden");
+        inputElement.classList.toggle("hidden");
+        if (textElement.classList.contains("hidden")) {
+          inputElement.value = textElement.textContent;
+          inputElement.focus();
+        } else {
+          textElement.textContent = inputElement.value;
+        }
+      });
+    }
   });
 
   document
@@ -76,8 +78,6 @@ const addEditableTextListeners = () => {
           input.blur();
           input.classList.toggle("hidden");
           textElement.classList.toggle("hidden");
-          // Update tooltip after text change
-          updateTooltips();
         }
       });
 
@@ -92,44 +92,11 @@ const addEditableTextListeners = () => {
         textElement.textContent = input.value;
         input.classList.add("hidden");
         textElement.classList.remove("hidden");
-        // Update tooltip after text change
-        updateTooltips();
       });
     });
 
-  // Initialize tooltips for editable text elements
-  updateTooltips();
 };
 
-const updateTooltips = () => {
-  // Add tooltips to editable text elements that have overflow
-  document.querySelectorAll(".editable-text").forEach((editableElement) => {
-    const textElement = editableElement.querySelector(
-      ".gallery-title, .caption-text",
-    );
-    if (textElement) {
-      const isOverflowing = textElement.scrollWidth > textElement.clientWidth;
-
-      if (isOverflowing) {
-        // Add tooltip with full text if truncated
-        textElement.setAttribute("data-tippy-content", textElement.textContent);
-        // Also add edit instruction
-        const fullTooltip = `${textElement.textContent}\n\nClick to edit`;
-        textElement.setAttribute("data-tippy-content", fullTooltip);
-      } else {
-        // Just show edit instruction
-        textElement.setAttribute("data-tippy-content", "Click to edit");
-      }
-    }
-  });
-
-  // Reinitialize tippy for new elements
-  tippy("[data-tippy-content]", {
-    allowHTML: false,
-    theme: "light-border",
-    placement: "top",
-  });
-};
 
 // Initialize empty state on page load and set up observer
 document.addEventListener("DOMContentLoaded", function () {

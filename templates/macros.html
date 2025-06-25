@@ -1,4 +1,4 @@
-{% macro editable_text(text, element_type, css_classes, hx_put_url, input_name, placeholder) %}
+{% macro editable_text(text, element_type, css_classes, hx_put_url, input_name, placeholder, user) %}
 <div class="editable-text">
   {% if element_type == "h2" %}
   <h2 class="{{css_classes}}">{{text}}</h2>
@@ -7,15 +7,17 @@
   {% else %}
   <div class="{{css_classes}}">{{text}}</div>
   {% endif %}
+  {% if user.role == 'Writer' %}
   <input type="text" class="{{css_classes}}-input hidden" value="{{text}}" 
          hx-put="{{hx_put_url}}" name="{{input_name}}" 
          hx-trigger="keyup delay:500ms, keyup[key=='Enter']" 
          placeholder="{{placeholder}}">
   <img class="edit-icon" src="/icons/edit-pencil.svg" alt="Edit" width="16" height="16">
+  {% endif %}
 </div>
 {% endmacro editable_text %}
 
-{% macro image_item(path, caption, image_id, gallery_id) %}
+{% macro image_item(path, caption, image_id, gallery_id, user) %}
 <div class="unified-tile">
   <div class="unified-tile-image">
     <img src="/{{path}}.thumbnail.jpg" alt="{{caption}}" hx-get="/galleries/{{gallery_id}}/lightbox/{{image_id}}" hx-target="#lightbox">
@@ -29,21 +31,24 @@
             css_classes="created-by caption-text",
             hx_put_url="/img/" ~ image_id,
             input_name="caption",
-            placeholder="Image caption"
+            placeholder="Image caption",
+            user=user
         ) }}
       </div>
+      {% if user.role == 'Writer' %}
       <div class="details" style="margin-left: 1rem;">
         <img class="clickable-icon" src="/icons/trash.svg" alt="Delete" width="16" height="16"
           hx-delete="/img/{{image_id}}" hx-confirm="Are you sure you want to delete this image?"
           hx-target="closest .unified-tile" hx-swap="delete">
         </img>
       </div>
+      {% endif %}
     </div>
   </div>
 </div>
 {% endmacro image_item %}
 
-{% macro gallery_item(gallery) %}
+{% macro gallery_item(gallery, user) %}
 <div class="unified-tile">
   <a href="/galleries/{{gallery.id}}" class="no-underline">
     <div class="unified-tile-image">
@@ -61,7 +66,8 @@
         css_classes="title gallery-title",
         hx_put_url="/galleries/" ~ gallery.id,
         input_name="name",
-        placeholder="Gallery name"
+        placeholder="Gallery name",
+        user=user
     ) }}
     <div class="details">
       <span class="image-count">{{gallery.image_count}} images</span>
@@ -69,10 +75,12 @@
     </div>
     <div class="details">
       <span class="created-by">Created by: {{gallery.created_by}}</span>
+      {% if user.role == 'Writer' %}
       <img class="clickable-icon" src="/icons/trash.svg" alt="Delete" width="16" height="16"
         hx-delete="/galleries/{{gallery.id}}" hx-confirm="Are you sure you want to delete this gallery?"
         hx-target="closest .unified-tile" hx-swap="delete">
       </img>
+      {% endif %}
     </div>
   </div>
 </div>

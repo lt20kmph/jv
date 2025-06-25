@@ -20,7 +20,7 @@
   <div>
     <div id='galleries' class="unified-grid">
       {% for gallery in galleries %}
-      {{ macros::gallery_item(gallery=gallery) }}
+      {{ macros::gallery_item(gallery=gallery, user=user) }}
       {% else %}
       <p>Hmm... Nothing here yet...</p>
       {% endfor %}

@@ -29,7 +29,7 @@
   <div>
   <div id='gallery' class="unified-grid">
     {% for image in gallery.images %}
-    {{ macros::image_item(path=image.path, caption=image.caption, image_id=image.id, gallery_id=gallery.id) }}
+    {{ macros::image_item(path=image.path, caption=image.caption, image_id=image.id, gallery_id=gallery.id, user=user) }}
     {% endfor %}
     </div>
   </div>
