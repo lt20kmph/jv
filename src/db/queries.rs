@@ -599,3 +599,16 @@ pub async fn update_image_caption(
 
     Ok(())
 }
+
+pub async fn delete_user_session(db: &Db, session_token: &str) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        DELETE FROM sessions WHERE session_token = ?1
+        "#,
+    )
+    .bind(session_token)
+    .execute(&db.0)
+    .await?;
+
+    Ok(())
+}
