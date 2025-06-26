@@ -41,7 +41,12 @@ const addEditableTextListeners = () => {
       // Mark as having listeners to prevent duplicates
       editableText.setAttribute("data-listeners-added", "true");
       
-      editableText.addEventListener("click", function (event) {
+      const handler = (event) => {
+        // Prevent ghost clicks on mobile
+        if (event.type === "touchend") {
+          event.preventDefault();
+        }
+
         const textElement = editableText.querySelector(
           ".gallery-title, .caption-text",
         );
@@ -57,7 +62,10 @@ const addEditableTextListeners = () => {
         } else {
           textElement.textContent = inputElement.value;
         }
-      });
+      };
+
+      editableText.addEventListener("click", handler);
+      editableText.addEventListener("touchend", handler);
     }
   });
 
