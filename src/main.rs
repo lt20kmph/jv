@@ -18,6 +18,7 @@ mod routes {
     pub mod index;
     pub mod js;
     pub mod login;
+    pub mod logout;
     pub mod signup;
 }
 mod tera_utils;
@@ -37,6 +38,7 @@ use routes::img;
 use routes::index;
 use routes::js;
 use routes::login;
+use routes::logout;
 use routes::signup;
 
 async fn create_tables(rocket: Rocket<Build>) -> fairing::Result {
@@ -73,6 +75,7 @@ fn stage() -> AdHoc {
                     img::update_caption,
                     login::post,
                     login::get,
+                    logout::get,
                     signup::post,
                     signup::get,
                     signup::verify,
