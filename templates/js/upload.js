@@ -17,7 +17,7 @@ const croppie = () => {
       enableOrientation: false,
       enforceBoundary: true,
       customClass: "croppie-container",
-      mouseWheelZoom: "ctrl",
+      mouseWheelZoom: true,
     });
   }
   return c;
@@ -26,11 +26,14 @@ const croppie = () => {
 const uploadFile = () => {
   const img = event.target.files[0];
   const url = URL.createObjectURL(img);
-  croppie().bind({
-    url: url,
-    points: [0, 0, 450, 450],
-    zoom: 0.1,
-  });
+  croppie()
+    .bind({
+      url: url,
+      points: [0, 0, 450, 450],
+    })
+    .then(() => {
+      c.setZoom(0);
+    });
 };
 
 async function setModifiedFile() {
