@@ -5,20 +5,17 @@ use argon2::{
     Argon2,
 };
 
+/// Verifies a password against a stored PHC-format Argon2 hash.
+/// The salt embedded in the hash is used automatically.
 pub fn verify_password(
-    db_salt: String,
     db_password_hash: &str,
     password: &str,
 ) -> Result<bool, password_hash::Error> {
-    let salt = SaltString::from_b64(db_salt.as_str())?;
+    let parsed_hash = PasswordHash::new(db_password_hash)?;
 
-    let argon2 = Argon2::default();
-
-    let password_hash = argon2
-        .hash_password(password.as_bytes(), &salt)?
-        .to_string();
-
-    Ok(password_hash == db_password_hash)
+    Ok(Argon2::default()
+        .verify_password(password.as_bytes(), &parsed_hash)
+        .is_ok())
 }
 
 pub fn hash_and_salt_password(user_password: &str) -> Result<SaltedPassword, password_hash::Error> {
@@ -104,7 +101,6 @@ mod tests {
         let salted_password = hash_and_salt_password(password).unwrap();
         
         let result = verify_password(
-            salted_password.salt.as_str().to_string(),
             &salted_password.password_hash,
             password,
         );
@@ -120,7 +116,6 @@ mod tests {
         let salted_password = hash_and_salt_password(correct_password).unwrap();
         
         let result = verify_password(
-            salted_password.salt.as_str().to_string(),
             &salted_password.password_hash,
             wrong_password,
         );
@@ -135,7 +130,6 @@ mod tests {
         let salted_password = hash_and_salt_password(password).unwrap();
         
         let result = verify_password(
-            salted_password.salt.as_str().to_string(),
             &salted_password.password_hash,
             password,
         );
@@ -156,7 +150,6 @@ mod tests {
         for password in passwords {
             let salted_password = hash_and_salt_password(&password).unwrap();
             let result = verify_password(
-                salted_password.salt.as_str().to_string(),
                 &salted_password.password_hash,
                 &password,
             );
@@ -169,27 +162,17 @@ mod tests {
     #[test]
     fn test_verify_password_invalid_salt() {
         let password = "test_password";
-        let salted_password = hash_and_salt_password(password).unwrap();
-        
-        let result = verify_password(
-            "invalid_salt_string".to_string(),
-            &salted_password.password_hash,
-            password,
-        );
+
+        let result = verify_password("invalid_hash_string", password);
         
         assert!(result.is_err());
     }
 
     #[test]
-    fn test_verify_password_malformed_salt() {
+    fn test_verify_password_hash_wrong_algorithm() {
         let password = "test_password";
-        let salted_password = hash_and_salt_password(password).unwrap();
-        
-        let result = verify_password(
-            "not_base64!@#$%".to_string(),
-            &salted_password.password_hash,
-            password,
-        );
+
+        let result = verify_password("$pbkdf2-sha256$i=1$abc$def", password);
         
         assert!(result.is_err());
     }
@@ -197,13 +180,8 @@ mod tests {
     #[test]
     fn test_verify_password_empty_salt() {
         let password = "test_password";
-        let salted_password = hash_and_salt_password(password).unwrap();
-        
-        let result = verify_password(
-            "".to_string(),
-            &salted_password.password_hash,
-            password,
-        );
+
+        let result = verify_password("", password);
         
         assert!(result.is_err());
     }
