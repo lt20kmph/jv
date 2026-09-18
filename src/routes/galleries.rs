@@ -198,9 +198,9 @@ pub async fn delete_gallery(
     db: &Db,
     _writer_session: WriterSession,
     gallery_id: i64,
-) -> Result<content::RawHtml<String>, errors::AppError> {
-    let gallery = queries::delete_gallery(db, gallery_id).await?;
-    Ok(content::RawHtml(format!("Gallery deleted: {:?}", gallery)))
+) -> Result<Status, errors::AppError> {
+    queries::delete_gallery(db, gallery_id).await?;
+    Ok(Status::NoContent)
 }
 
 #[put("/galleries/<gallery_id>", data = "<update>")]
@@ -209,12 +209,9 @@ pub async fn update_gallery(
     db: &Db,
     _writer_session: WriterSession,
     gallery_id: i64,
-) -> Result<content::RawHtml<String>, errors::AppError> {
-    let gallery = queries::update_gallery(db, gallery_id, update.into_inner()).await?;
-    Ok(content::RawHtml(format!(
-        "Gallery title updated: {:?}",
-        gallery
-    )))
+) -> Result<Status, errors::AppError> {
+    queries::update_gallery(db, gallery_id, update.into_inner()).await?;
+    Ok(Status::NoContent)
 }
 
 #[get("/galleries/<gallery_id>/upload_form")]
