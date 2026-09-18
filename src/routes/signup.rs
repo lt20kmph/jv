@@ -2,7 +2,7 @@ use crate::constants;
 use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
-use crate::models::models::UserSignup;
+use crate::models::models::{self, UserSignup};
 use crate::tera_utils;
 use log::info;
 use reqwest;
@@ -90,24 +90,59 @@ pub async fn verify(
     verification_id: String,
     db: &Db,
 ) -> Result<content::RawHtml<String>, errors::AppError> {
-    // TODO: Add TTL for verification links
-    let email = queries::verify_user(db, &verification_id).await?;
-    let host = env::var("JV_HOST").expect("JV_HOST must be set");
-    let login_link = format!("https://{}/login", host);
+    let user = queries::get_user_by_verification(db, &verification_id).await?;
+
+    let outcome = match user {
+        // Unknown or already-used link
+        None => models::VerificationOutcome::Invalid,
+        Some((email, time_created, is_verified)) => {
+            if is_verified {
+                models::VerificationOutcome::AlreadyVerified
+            } else if is_verification_expired(&time_created) {
+                models::VerificationOutcome::Expired
+            } else {
+                queries::verify_user(db, &verification_id).await?;
+
+                let host = env::var("JV_HOST").expect("JV_HOST must be set");
+                let login_link = format!("https://{}/login", host);
+
+                let mut context = tera::Context::new();
+                context.insert("login_link", &login_link);
+
+                let email_body =
+                    tera_utils::render_template_with_logging("welcome.html", &context)?;
+
+                send_email(
+                    &email,
+                    constants::WELCOME_SUBJECT,
+                    &email_body,
+                    constants::WELCOME_CATEGORY,
+                )
+                .await?;
+
+                models::VerificationOutcome::Verified
+            }
+        }
+    };
 
     let mut context = tera::Context::new();
-    context.insert("login_link", &login_link);
+    context.insert("outcome", &outcome);
 
-    let email_body = tera_utils::render_template_with_logging("welcome.html", &context)?;
+    let page =
+        tera_utils::render_template_with_logging("verification_result.html", &context)?;
+    Ok(content::RawHtml(page))
+}
 
-    send_email(
-        &email,
-        constants::WELCOME_SUBJECT,
-        &email_body,
-        constants::WELCOME_CATEGORY,
-    )
-    .await?;
-
-    let login = "";
-    Ok(content::RawHtml(login.to_string()))
+fn is_verification_expired(time_created: &str) -> bool {
+    match chrono::NaiveDateTime::parse_from_str(time_created, "%Y-%m-%d %H:%M:%S") {
+        Ok(created) => {
+            let age = chrono::Utc::now().naive_utc() - created;
+            age > chrono::Duration::days(constants::VERIFICATION_LINK_TTL_DAYS)
+        }
+        Err(e) => {
+            info!("Couldn't parse time_created '{}': {}", time_created, e);
+            // Fail closed: treat unparseable timestamps as expired
+            true
+        }
+    }
 }

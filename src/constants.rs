@@ -4,6 +4,7 @@ use tera::Tera;
 use log::error;
 
 pub static SESSION_LENGTH: i64 = 60 * 60 * 24 * 7; // 1 week
+pub static VERIFICATION_LINK_TTL_DAYS: i64 = 7;
 
 pub static IMG_PATH: &str = "./img";
 pub static MAILTRAP_SEND: &str = "https://send.api.mailtrap.io/api/send";
