@@ -16,7 +16,7 @@ pub async fn get(cookies: &CookieJar<'_>, jv_db: &Db) -> Result<Redirect, errors
         queries::delete_user_session(jv_db, session_token).await?;
         
         // Remove the session cookie
-        cookies.remove_private(Cookie::named("s_id"));
+        cookies.remove_private(Cookie::build("s_id").build());
     }
     
     // Redirect to login page

@@ -1,5 +1,6 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
+use std::env;
 use tera::Tera;
 use log::error;
 
@@ -15,6 +16,27 @@ pub static WELCOME_SUBJECT: &str = "Welcome to JV";
 pub static WELCOME_CATEGORY: &str = "welcome";
 pub static THUMBNAIL_SIZE: u32 = 300;
 pub static THUMBNAIL_EXT: &str = "thumbnail.jpg";
+
+lazy_static! {
+    pub static ref CONFIG: Config = Config::from_env();
+}
+
+/// Environment configuration, read once at startup.
+pub struct Config {
+    pub jv_host: String,
+    pub jv_admin_email: String,
+    pub mailtrap_api_key: String,
+}
+
+impl Config {
+    fn from_env() -> Config {
+        Config {
+            jv_host: env::var("JV_HOST").expect("JV_HOST must be set"),
+            jv_admin_email: env::var("JV_ADMIN_EMAIL").expect("JV_ADMIN_EMAIL must be set"),
+            mailtrap_api_key: env::var("MAILTRAP_API_KEY").expect("MAILTRAP_API_KEY must be set"),
+        }
+    }
+}
 
 lazy_static! {
     pub static ref COLORS: HashMap<&'static str, &'static str> = [

@@ -3,7 +3,7 @@ use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
 use crate::middleware::WriterSession;
-use crate::models::models;
+use crate::models;
 use crate::tera_utils;
 use image::ImageReader;
 
@@ -21,10 +21,7 @@ pub async fn post(
 ) -> Result<content::RawHtml<String>, errors::AppError> {
     let gallery_name = create_gallery.name;
 
-    let gallery_name = match gallery_name {
-        Some(name) => name,
-        None => "Untitled",
-    };
+    let gallery_name = gallery_name.unwrap_or("Untitled");
 
     let gallery_id = queries::create_gallery(db, writer_session.user().id, gallery_name).await?;
 
@@ -47,7 +44,7 @@ pub async fn post(
 
 #[post("/galleries/<gallery_id>", data = "<img_upload>")]
 pub async fn post_img(
-    mut img_upload: Form<models::ImgUpload<'_>>,
+    img_upload: Form<models::ImgUpload<'_>>,
     writer_session: WriterSession,
     gallery_id: i64,
     db: &Db,
@@ -74,19 +71,19 @@ pub async fn post_img(
     .await?;
 
     // Save the file (persist to should be more performant... but this should be good enough)
-    // TODO: These can be done in parallel
-    match image.original_path {
-        Some(original_path) => {
-            img_upload.file.copy_to(&original_path).await?;
-        }
+    let original_path = match image.original_path {
+        Some(original_path) => original_path,
         None => {
             return Err(errors::AppError {
                 message: "No original path found".to_string(),
                 code: Status::InternalServerError.code,
             })
         }
-    }
-    img_upload.modified_file.copy_to(&image.path).await?;
+    };
+
+    let models::ImgUpload { mut file, mut modified_file, caption } = img_upload.into_inner();
+
+    tokio::try_join!(file.copy_to(&original_path), modified_file.copy_to(&image.path))?;
 
     let mut thumbnail = ImageReader::open(&image.path)?
         .with_guessed_format()?
@@ -96,7 +93,7 @@ pub async fn post_img(
 
     thumbnail = thumbnail.thumbnail(constants::THUMBNAIL_SIZE, constants::THUMBNAIL_SIZE);
 
-    let thumbnail_path = format!("{}.{}", &image.path, constants::THUMBNAIL_EXT);
+    let thumbnail_path = format!("{}.{}", image.path, constants::THUMBNAIL_EXT);
 
     info!("Saving thumbnail to: {}", &thumbnail_path);
 
@@ -105,7 +102,7 @@ pub async fn post_img(
     let mut context = tera::Context::new();
 
     context.insert("path", &image.path);
-    context.insert("caption", &img_upload.caption);
+    context.insert("caption", caption);
     context.insert("gallery_id", &gallery_id);
     context.insert("image_id", &image.id);
     context.insert("user", writer_session.user());

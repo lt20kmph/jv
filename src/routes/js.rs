@@ -1,4 +1,3 @@
-use crate::constants;
 use crate::errors;
 use crate::tera_utils;
 use rocket::get;

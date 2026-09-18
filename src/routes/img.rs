@@ -2,11 +2,10 @@ use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
 use crate::middleware::WriterSession;
-use crate::models::models;
+use crate::models;
 use rocket::form::Form;
 use rocket::fs::{relative, NamedFile};
 use rocket::http::Status;
-use rocket::response::content;
 use rocket::{delete, get, put};
 use std::path::{Path, PathBuf};
 

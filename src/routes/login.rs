@@ -1,8 +1,7 @@
-use crate::constants;
 use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
-use crate::models::models::UserLogin;
+use crate::models::UserLogin;
 use crate::tera_utils;
 
 use rocket::form::Form;
