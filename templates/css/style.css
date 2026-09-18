@@ -651,6 +651,26 @@ input[type=file]::file-selector-button:hover {
     background: rgba(0, 0, 0, 0.8);
 }
 
+.lightbox-close-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    z-index: 3;
+    border-radius: 0.25rem;
+    transition: background 0.3s;
+}
+
+.lightbox-close-button:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
 .lightbox-prev-button {
     left: 0;
     border-radius: 0 0.1875rem 0.1875rem 0;
