@@ -8,9 +8,7 @@ mod db {
 }
 mod errors;
 mod middleware;
-mod models {
-    pub mod models;
-}
+mod models;
 mod routes {
     pub mod about;
     pub mod css;
@@ -26,7 +24,6 @@ mod tera_utils;
 
 use db::queries;
 use db::queries::Db;
-use env_logger;
 use log::error;
 use rocket::fairing::{self, AdHoc};
 use rocket::fs::{relative, FileServer};
@@ -43,9 +40,10 @@ use routes::login;
 use routes::logout;
 use routes::signup;
 
+#[allow(clippy::result_large_err)] // Rocket's fairing API requires returning the Rocket on failure
 async fn create_tables(rocket: Rocket<Build>) -> fairing::Result {
     match Db::fetch(&rocket) {
-        Some(db) => match queries::create_tables(&db).await {
+        Some(db) => match queries::create_tables(db).await {
             Ok(_) => Ok(rocket),
             Err(e) => {
                 error!("Failed to initialize SQLx database: {}", e);

@@ -1,8 +1,8 @@
-use crate::constants;
+use crate::constants::{self, CONFIG};
 use crate::db::queries;
 use crate::db::queries::Db;
 use crate::errors;
-use crate::models::models::{self, UserSignup};
+use crate::models::{self, UserSignup};
 use crate::tera_utils;
 use log::info;
 use reqwest;
@@ -11,7 +11,6 @@ use rocket::response::content;
 use rocket::{get, post};
 use rocket_db_pools::Connection;
 use serde_json::json;
-use std::env;
 
 async fn send_email(
     to: &str,
@@ -19,7 +18,6 @@ async fn send_email(
     body: &str,
     category: &str,
 ) -> Result<(), errors::AppError> {
-    let api_key = env::var("MAILTRAP_API_KEY").expect("MAILTRAP_API_KEY must be set");
     let email_payload = json!({
         "from": {"email" : constants::JV_EMAIL},
         "to": [{"email": to}],
@@ -33,7 +31,7 @@ async fn send_email(
     let response = client
         .post(constants::MAILTRAP_SEND)
         .header("Content-Type", "application/json")
-        .header("Api-Token", api_key)
+        .header("Api-Token", CONFIG.mailtrap_api_key.clone())
         .body(email_payload.to_string()) // Serialize the JSON payload to a string
         .send()
         .await?;
@@ -64,14 +62,14 @@ pub async fn post(
 ) -> Result<content::RawHtml<String>, errors::AppError> {
     let verification_id =
         queries::insert_user(conn, &user_signup.email, &user_signup.password).await?;
-    let host = env::var("JV_HOST").expect("JV_HOST must be set");
+    let host = CONFIG.jv_host.clone();
     let verification_link = format!("https://{}/signup/{}", host, verification_id);
     let mut context = tera::Context::new();
     context.insert("verification_link", &verification_link);
     context.insert("new_user_email", &user_signup.email);
 
     let email_body = tera_utils::render_template_with_logging("verify_signup.html", &context)?;
-    let admin_email = env::var("JV_ADMIN_EMAIL").expect("JV_ADMIN_EMAIL must be set");
+    let admin_email = CONFIG.jv_admin_email.clone();
 
     send_email(
         &admin_email,
@@ -103,7 +101,7 @@ pub async fn verify(
             } else {
                 queries::verify_user(db, &verification_id).await?;
 
-                let host = env::var("JV_HOST").expect("JV_HOST must be set");
+                let host = CONFIG.jv_host.clone();
                 let login_link = format!("https://{}/login", host);
 
                 let mut context = tera::Context::new();

@@ -66,7 +66,6 @@ pub struct User {
 
 #[derive(Debug)]
 pub struct Session {
-    pub session_token: String,
     pub user: User,
 }
 
