@@ -12,6 +12,7 @@ mod models {
     pub mod models;
 }
 mod routes {
+    pub mod about;
     pub mod css;
     pub mod galleries;
     pub mod img;
@@ -32,6 +33,7 @@ use rocket::fs::{relative, FileServer};
 use rocket::{catchers, Build, Rocket};
 use rocket::{launch, routes};
 use rocket_db_pools::Database;
+use routes::about;
 use routes::css;
 use routes::galleries;
 use routes::img;
@@ -62,6 +64,7 @@ fn stage() -> AdHoc {
             .mount(
                 "/",
                 routes![
+                    about::get,
                     galleries::post,
                     galleries::post_img,
                     galleries::get,
