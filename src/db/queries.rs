@@ -397,6 +397,32 @@ pub async fn get_gallery_images(db: &Db, gallery_id: i64) -> Vec<models::Image> 
     images
 }
 
+/// Looks up a user by their signup verification UUID.
+/// Returns (email, time_created, is_verified) or None if the UUID is unknown.
+pub async fn get_user_by_verification(
+    db: &Db,
+    verification_uuid: &str,
+) -> Result<Option<(String, String, bool)>, sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        SELECT email, time_created, is_verified
+        FROM users
+        WHERE verification_uuid = ?1
+        "#,
+    )
+    .bind(verification_uuid)
+    .fetch_optional(&db.0)
+    .await?;
+
+    Ok(row.map(|row| {
+        (
+            row.get::<String, _>(0),
+            row.get::<String, _>(1),
+            row.get::<bool, _>(2),
+        )
+    }))
+}
+
 pub async fn verify_user(db: &Db, verification_uuid: &str) -> Result<String, sqlx::Error> {
     let row = sqlx::query(
         r#"

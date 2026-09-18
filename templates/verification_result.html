@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Account verified{% endblock title %}
+{% block body %}
+<div>
+  {% if outcome == "Verified" %}
+  <h2>You're verified!</h2>
+  <p>Thanks for signing up. You can now <a href="/login">log in</a>.</p>
+  {% elif outcome == "AlreadyVerified" %}
+  <h2>Already verified</h2>
+  <p>This account has already been verified. You can <a href="/login">log in</a>.</p>
+  {% elif outcome == "Expired" %}
+  <h2>Link expired</h2>
+  <p>This verification link has expired. Please <a href="/signup">sign up</a> again.</p>
+  {% else %}
+  <h2>Invalid link</h2>
+  <p>This verification link isn't valid. Please <a href="/signup">sign up</a> again or <a href="/login">log in</a>.</p>
+  {% endif %}
+</div>
+{% endblock body %}
