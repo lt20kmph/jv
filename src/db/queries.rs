@@ -195,7 +195,7 @@ pub async fn verify_password(
 ) -> Result<bool, errors::AppError> {
     let row = sqlx::query(
         r#"
-        SELECT password, salt FROM users WHERE email = ?1
+        SELECT password FROM users WHERE email = ?1
         "#,
     )
     .bind(email)
@@ -208,10 +208,8 @@ pub async fn verify_password(
     };
 
     let db_password_hash: String = row.get(0);
-    let db_salt: String = row.get(1);
 
     Ok(pw_utils::verify_password(
-        db_salt,
         &db_password_hash,
         password,
     )?)
