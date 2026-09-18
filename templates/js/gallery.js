@@ -5,6 +5,58 @@ function beforeUploadFormRequest() {
   }
 }
 
+// Lightbox controls
+
+function closeLightbox() {
+  document.getElementById("lightbox").innerHTML = "";
+}
+
+function setupLightboxListeners() {
+  const lightboxTarget = document.getElementById("lightbox");
+  if (!lightboxTarget) return;
+
+  // Click on the backdrop (outside the image) closes the lightbox
+  lightboxTarget.addEventListener("click", (event) => {
+    if (event.target === lightboxTarget) closeLightbox();
+  });
+
+  let touchStartX = null;
+
+  // Swipe left/right navigates to the previous/next image
+  document.addEventListener(
+    "touchstart",
+    (event) => {
+      if (event.target.closest(".lightbox")) {
+        touchStartX = event.touches[0].clientX;
+      }
+    },
+    { passive: true },
+  );
+
+  document.addEventListener(
+    "touchend",
+    (event) => {
+      if (touchStartX === null) return;
+
+      const deltaX = event.changedTouches[0].clientX - touchStartX;
+      touchStartX = null;
+
+      if (Math.abs(deltaX) < 60) return;
+
+      const button = deltaX < 0
+        ? document.querySelector(".lightbox-next-button")
+        : document.querySelector(".lightbox-prev-button");
+      if (button) button.click();
+    },
+    { passive: true },
+  );
+}
+
+// Escape closes the lightbox
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeLightbox();
+});
+
 function updateGalleryEmptyState() {
   const gallery = document.getElementById("gallery");
   const emptyMessage = gallery.querySelector("p.empty-message");
@@ -110,6 +162,7 @@ const addEditableTextListeners = () => {
 document.addEventListener("DOMContentLoaded", function () {
   updateGalleryEmptyState();
   addEditableTextListeners();
+  setupLightboxListeners();
 
   // Set up MutationObserver to watch for changes in the gallery
   const gallery = document.getElementById("gallery");
