@@ -26,8 +26,13 @@ function setupLightboxListeners() {
   document.addEventListener(
     "touchstart",
     (event) => {
-      if (event.target.closest(".lightbox")) {
-        touchStartX = event.touches[0].clientX;
+      const touch = event.touches[0];
+      if (
+        touch &&
+        touch.target instanceof Element &&
+        touch.target.closest(".lightbox")
+      ) {
+        touchStartX = touch.clientX;
       }
     },
     { passive: true },
