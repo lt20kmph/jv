@@ -5,13 +5,13 @@
 
 <ul class="concert-one-regular navbar">
   <li>
-    <a href="/galleries"><- Back to Galleries</a>
+    <a href="/galleries">&larr; <span class="nav-label-long">Back to</span>Galleries</a>
   </li>
   {% if user.role =='Writer' %}
   <li>
     <a hx-get="/galleries/{{gallery.id}}/upload_form" hx-target="#upload_form"
       hx-on:htmx:before-request="beforeUploadFormRequest();">
-      + Upload pictures
+      + Upload<span class="nav-label-long">pictures</span>
     </a>
   </li>
   {% endif %}
@@ -19,17 +19,17 @@
     <span>/ {{gallery.name}}</span>
   </li>
   {% if deploy %}
-  <li style="float:right">
-    <a data-tippy-content="Deployed {{deploy.at_exact}}{% if deploy.sha %} ({{deploy.sha}}){% endif %}" style="font-size: 0.8rem; font-style: normal;">
+  <li class="nav-right nav-meta">
+    <a data-tippy-content="Deployed {{deploy.at_exact}}{% if deploy.sha %} ({{deploy.sha}}){% endif %}">
       Deployed: {{deploy.at_human}}
     </a>
   </li>
   {% endif %}
-  <li style="float:right">
+  <li class="nav-right">
     <a href="/about">About</a>
   </li>
-  <li style="float:right">
-    <a href="/logout" title="Logout {{user.email}}">
+  <li class="nav-right">
+    <a class="nav-icon" href="/logout" title="Logout {{user.email}}" aria-label="Log out">
       <img src="/icons/logout.svg" alt="Logout" style="width: 18px; height: 18px; vertical-align: middle; filter: invert(94%) sepia(8%) saturate(353%) hue-rotate(15deg) brightness(100%) contrast(96%);">
     </a>
   </li>

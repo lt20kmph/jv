@@ -3,11 +3,28 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- No maximum-scale/user-scalable=no: pinch zoom must stay available (WCAG 1.4.4) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- Literal, not a template variable: page contexts don't carry the colour
+       map, only the /css route does. Keep in sync with COLORS in constants.rs. -->
+  <meta name="theme-color" content="#252422">
   <title>{% block title %} {% endblock title %}</title>
   <link href="/css/style.css" rel="stylesheet" />
   <link rel="icon" href="/favicons/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
+  <link rel="manifest" href="/favicons/site.webmanifest">
   <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+  <script>
+    // The mutation endpoints answer 204 No Content, and htmx skips the swap on
+    // 204 by default - so hx-swap="delete" never ran and a deleted tile stayed
+    // on screen until the next reload. Opt those DELETEs back into swapping.
+    document.addEventListener("htmx:beforeSwap", function (e) {
+      if (e.detail.xhr.status === 204 && e.detail.requestConfig.verb === "delete") {
+        e.detail.shouldSwap = true;
+        e.detail.isError = false;
+      }
+    });
+  </script>
   <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
   <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js"></script>
   <script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>

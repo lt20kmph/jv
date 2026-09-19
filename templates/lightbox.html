@@ -5,7 +5,11 @@
       <button class="lightbox-nav-button lightbox-prev-button"
         hx-get="/galleries/{{gallery_id}}/lightbox/{{previous_image_id}}" hx-target="#lightbox">
         ‹</button>
-      <img src="/{{this_image.path}}" alt="{{this_image.caption}}">
+      <!-- Thumbnail renders immediately as a placeholder while the full-size
+           file downloads; decoding async keeps the swap off the main thread. -->
+      <img src="/{{this_image.path}}" alt="{{this_image.caption}}"
+        style="background-image: url('/{{this_image.path}}.thumbnail.jpg'); background-size: contain; background-position: center; background-repeat: no-repeat;"
+        decoding="async" fetchpriority="high">
       <button class="lightbox-nav-button lightbox-next-button"
         hx-get="/galleries/{{gallery_id}}/lightbox/{{next_image_id}}" hx-target="#lightbox">
         ›</button>

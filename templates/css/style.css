@@ -4,29 +4,53 @@
   --vanilla: {{vanilla}};
   --blue: {{blue}};
   --sugar: {{sugar}};
-  --base-font-size: 16px; /* Base font size for rem calculations */
+
+  /* Touch target sizes. 24px is the WCAG 2.5.8 (AA) floor, 44px is 2.5.5 (AAA)
+     and matches Apple HIG / Material. We aim for 44 on standalone controls. */
+  --tap-min: 44px;
+
+  /* Fluid type. The rem term is what keeps these responsive to browser zoom and
+     to the user's default font-size preference - a pure vw value would fail
+     WCAG 1.4.4. Scales between roughly 360px and 1200px viewports. */
+  --step-0: clamp(1rem, 0.95rem + 0.22vw, 1.125rem);      /* body */
+  --step-1: clamp(1.15rem, 1.05rem + 0.45vw, 1.4rem);     /* nav / brand */
+  --step-2: clamp(1.25rem, 1.1rem + 0.7vw, 1.65rem);      /* headings */
+  --step--1: clamp(0.9rem, 0.86rem + 0.18vw, 1rem);       /* captions, meta */
 }
 
 /* General */
+
+/* Deliberately NOT setting a px font-size on html: that would discard the
+   user's browser font-size preference and break rem scaling everywhere. */
 html {
-  font-size: var(--base-font-size);
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%; /* stop iOS inflating text in landscape */
 }
 
 body {
   background-color: var(--sugar);
   margin: 0;
   padding: 0;
-  font-size: 1rem;
+  font-size: var(--step-0);
+  line-height: 1.5;
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* Block, not flex: a flex container makes the inner wrapper shrink-to-fit, which
+   made .unified-grid resolve width:100% against a box narrower than the screen
+   (328px on a 393px phone). */
 .content {
-  margin: 1.25rem;
-  display: flex;
-  justify-content: center;
+  margin: 0 auto;
+  padding: 1rem;
+  width: 100%;
+  max-width: 1400px;
+}
+
+.content > div {
+  width: 100%;
 }
 
 
@@ -35,12 +59,21 @@ body {
   flex-wrap: wrap;
 }
 
+/* Stack by default so the upload form's controls get the full width on a phone;
+   the two-column row is opted into at >=700px below. */
 .horizontal-container > div { /* Target direct children */
-  flex: 1; /* Allow children to grow equally */
+  flex: 1 1 100%;
+  min-width: 0; /* let flex items shrink below their content width */
   padding: 0.625rem;
   margin: 0.3125rem; /* Optional spacing between children */
   border-radius: 0.25rem;
   border: 0;
+}
+
+@media (min-width: 700px) {
+  .horizontal-container > div {
+    flex: 1 1 0;
+  }
 }
 
 /* Navbar */
@@ -60,14 +93,66 @@ ul.navbar li {
   float: none;
 }
 
+/* float has no effect on a flex item, so the inline style="float:right" in the
+   templates never right-aligned anything. This is the flex equivalent: the first
+   .nav-right after a normal item absorbs the slack and pushes the rest right. */
+ul.navbar li:not(.nav-right) + li.nav-right {
+  margin-left: auto;
+}
+
+/* A flex container turns each text run into an anonymous flex item and strips
+   the whitespace between them, so "Back to Galleries" collapsed to
+   "Back toGalleries". gap restores the separation explicitly, and it disappears
+   cleanly when .nav-label-long is display:none. */
 ul.navbar li a {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
+  min-height: var(--tap-min);
   color: var(--vanilla);
   text-align: center;
-  padding: 0.875rem 1rem;
+  padding: 0.5rem 0.625rem;
   text-decoration: none;
   margin: 0;
   border-radius: 0.25rem;
+  white-space: nowrap;
+}
+
+/* Icon-only nav links shrink-wrap to their 18px glyph, so give them a square
+   tap target rather than a 38px-wide sliver. */
+ul.navbar li a.nav-icon {
+  min-width: var(--tap-min);
+}
+
+/* Informational nav item (deploy timestamp) rather than an action: smaller and
+   upright, and it's the first thing to go when the bar gets tight. */
+ul.navbar li.nav-meta a {
+  font-size: var(--step--1);
+  font-style: normal;
+  opacity: 0.75;
+  cursor: default;
+}
+
+@media (max-width: 560px) {
+  ul.navbar li.nav-meta {
+    display: none;
+  }
+}
+
+/* Drop the wordier half of nav labels on narrow screens so the action row fits
+   on one line; the full wording returns as soon as there is room. */
+.nav-label-long {
+  display: none;
+}
+
+@media (min-width: 700px) {
+  ul.navbar li a {
+    padding: 0.5rem 1rem;
+  }
+  .nav-label-long {
+    display: inline;
+  }
 }
 
 /* Change the link color to #111 (black) on hover */
@@ -79,7 +164,7 @@ li a:hover {
   font-family: "Concert One", sans-serif;
   font-weight: 400;
   font-style: normal;
-  font-size: 1.5rem;
+  font-size: var(--step-1);
 }
 
 .navbar {
@@ -87,19 +172,41 @@ li a:hover {
   margin: 0;
 }
 
+/* The gallery name is the longest item in the bar and pushed About/Logout onto
+   their own wrapped rows on a phone. Below 700px it gets a row of its own
+   (order:1 moves it after the actions regardless of source order) and
+   ellipsizes, so the bar is a predictable two rows instead of three. */
 .gallery-title-nav {
   float: left;
+  flex: 1 0 100%;
+  order: 1;
+  min-width: 0;
 }
 
 .gallery-title-nav span {
   display: block;
   color: var(--vanilla);
-  text-align: center;
-  padding: 0.4375rem 0.5rem;
-  margin: 0.4375rem 0.5rem;
+  text-align: left;
+  padding: 0.25rem 0.5rem 0.5rem;
+  margin: 0 0.5rem;
   border-radius: 0.25rem;
   font-style: italic;
   opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 700px) {
+  .gallery-title-nav {
+    flex: 0 1 auto;
+    order: 0;
+  }
+  .gallery-title-nav span {
+    text-align: center;
+    padding: 0.4375rem 0.5rem;
+    margin: 0.4375rem 0.5rem;
+  }
 }
 
 .montserrat-body {
@@ -111,15 +218,23 @@ li a:hover {
 
 /* End of Navbar */
 
+/* Form controls must render at >=16px or iOS Safari auto-zooms the page when
+   they receive focus. max() keeps that floor without an !important override and
+   still lets the size grow with the user's font preference. */
+input, button, select, textarea {
+  font-size: max(16px, 1rem);
+  font-family: inherit;
+}
+
 /* Full-width input fields */
 .login-input, .login-input-password {
   width: 100%;
-  padding: 1rem;
+  min-height: var(--tap-min);
+  padding: 0.875rem 1rem;
   margin: 0.3125rem 0 1.375rem 0;
   display: inline-block;
   border: none;
   background: var(--vanilla);
-  font-size: 1rem;
 }
 
 .login-input:focus, .login-input-password:focus {
@@ -136,13 +251,13 @@ hr {
 button {
   background-color: var(--blue);
   color: var(--vanilla);
-  padding: 0.875rem 1.25rem;
+  min-height: var(--tap-min);
+  padding: 0.75rem 1.25rem;
   margin: 0.5rem 0;
   border: none;
   cursor: pointer;
   width: 100%;
   opacity: 0.9;
-  font-size: 1rem;
 }
 
 button:hover {
@@ -155,19 +270,27 @@ button:hover {
   width: 50%;
 }
 
-/* Add padding to container elements */
+/* Auth forms (login / signup / forgot / reset).
+   Previously this was position:absolute + translate(-50%,-50%), which takes the
+   card out of flow: body then has no height, so any form taller than the
+   viewport (signup on a small phone, or any form with the keyboard open)
+   overflowed off the top with no way to scroll to it. Flex centering on a
+   scrollable wrapper keeps it centred when it fits and scrollable when it
+   doesn't. dvh tracks the collapsing mobile address bar; vh is the fallback. */
 .container {
-  padding: 1rem;
+  padding: 1.25rem;
   background-color: var(--vanilla);
-  width: 90vw;
-  max-width: 500px;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
+  width: min(100% - 2rem, 500px);
+  margin: auto;
   border-radius: 0.625rem;
   box-shadow: 0 0.25rem 0.5rem 0 rgba(0,0,0,0.2);
+}
+
+.auth-page {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 1rem 0;
 }
 
 /* Change styles for cancel button and signup button on extra small screens */
@@ -178,12 +301,12 @@ button:hover {
 }
 .error {
   color: red;
-  font-size: 0.875rem;
+  font-size: var(--step--1);
 }
 
 .success {
   color: green;
-  font-size: 0.875rem;
+  font-size: var(--step--1);
 }
 
 .submitbtn {
@@ -194,7 +317,8 @@ button:hover {
   border-radius: 0.25rem;
   cursor: pointer;
   width: 100%;
-  font-size: 1rem;
+  min-height: var(--tap-min);
+  font-size: max(16px, 1rem);
   opacity: 0.6;
   /* Initially disabled */
   pointer-events: none;
@@ -220,34 +344,21 @@ button:hover {
 
 /* Unified Grid System */
 
-/* Unified grid container */
+/* Unified grid container. Mobile-first: one full-width column, then extra
+   columns are added as room appears. */
 .unified-grid {
   display: grid;
-  gap: 1.25rem;
-  padding: 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-  justify-content: center;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+  width: 100%;
   max-width: 1400px;
   margin: 0 auto;
 }
 
-/* Grid must span the full viewport width so auto-fit track counts are
-   computed from the real available width; .content is shrink-to-fit */
-.unified-grid {
-  width: 100%;
-}
-
-@media (max-width: 768px) {
+@media (min-width: 560px) {
   .unified-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  }
-}
-
-@media (max-width: 480px) {
-  .unified-grid {
-    grid-template-columns: 1fr;
-    padding: 1rem;
-    gap: 1rem;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
   }
 }
 
@@ -259,10 +370,17 @@ button:hover {
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
-  max-width: 300px;
   display: flex;
   flex-direction: column;
   justify-self: center; /* Center tile in grid cell */
+}
+
+/* Only cap tile width once there can be more than one per row - the old
+   unconditional max-width:300px left dead gutters on a single-column phone. */
+@media (min-width: 560px) {
+  .unified-tile {
+    max-width: 340px;
+  }
 }
 
 .unified-tile:hover {
@@ -270,11 +388,20 @@ button:hover {
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
 }
 
+/* Thumbnails are generated square (THUMBNAIL_SIZE), so a fixed 200px-tall box
+   made object-fit:cover crop the top and bottom off every photo. A square ratio
+   shows the thumbnail as generated; widescreen gets a shallower crop. */
 .unified-tile-image {
   width: 100%;
-  height: 200px;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   position: relative;
+}
+
+@media (min-width: 560px) {
+  .unified-tile-image {
+    aspect-ratio: 4 / 3;
+  }
 }
 
 .unified-tile-image img {
@@ -301,7 +428,7 @@ button:hover {
 
 /* Unified tile caption for images */
 .unified-tile-caption {
-  font-size: 0.9rem;
+  font-size: var(--step--1);
   color: var(--black);
   margin: 0 0 0.625rem 0;
   flex: 1;
@@ -328,8 +455,9 @@ button:hover {
 
 .unified-tile .details {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  font-size: 0.9rem;
+  font-size: var(--step--1);
   color: #555;
   padding: 0.3125rem 0;
 }
@@ -356,7 +484,7 @@ button:hover {
 h2 {
   text-align: center;
   margin-bottom: 1.25rem;
-  font-size: 1.5rem;
+  font-size: var(--step-2);
 }
 
 form h2 {
@@ -389,10 +517,11 @@ label {
 .file-input,
 .caption-input {
   width: 100%;
+  min-height: var(--tap-min);
   border: 1px solid var(--black);
   border-radius: 0.125rem;
   transition: border-color 0.3s;
-  font-size: 1rem;
+  font-size: max(16px, 1rem);
 }
 
 .file-input {
@@ -417,7 +546,8 @@ label {
   border: 1px solid var(--black);
   border-radius: 0.125rem;
   cursor: pointer;
-  font-size: 1rem;
+  min-height: var(--tap-min);
+  font-size: max(16px, 1rem);
   transition: background-color 0.3s;
 }
 
@@ -462,9 +592,17 @@ input[type=file]::file-selector-button:hover {
 
 .croppie-container {
   margin-top: 1.25rem;
-  height: 450px;
   width: 100%;
   max-width: 450px;
+  height: auto;
+}
+
+/* Croppie sets inline px on its own boundary; keep whatever it computes from
+   overflowing the column on narrow screens. */
+#croppie,
+.croppie-container .croppie-viewport,
+.croppie-container .cr-boundary {
+  max-width: 100%;
 }
 /* End of Form */
 
@@ -526,6 +664,39 @@ input[type=file]::file-selector-button:hover {
   opacity: 1;
 }
 
+/* Touch devices never fire :hover, so the pencil was permanently invisible on a
+   phone - there was no visible affordance that captions/titles were editable. */
+@media (hover: none) {
+  .edit-icon {
+    opacity: 0.6;
+  }
+}
+
+/* Icon buttons: the glyph stays 16px but the hit area is a full tap target.
+   16x16 targets failed WCAG 2.5.8 (24px AA minimum). */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: 0;
+  margin: 0;
+  width: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  flex: 0 0 auto;
+}
+
+.icon-button:hover,
+.icon-button:focus-visible {
+  opacity: 1;
+  background: none;
+}
+
 .clickable-icon {
   cursor: pointer;
 }
@@ -536,7 +707,7 @@ input[type=file]::file-selector-button:hover {
 
 /* Gallery Title Styles */
 .gallery-title {
-  font-size: 1.5rem;
+  font-size: var(--step-2);
   font-weight: bold;
   color: #333;
   text-align: left;
@@ -547,7 +718,7 @@ input[type=file]::file-selector-button:hover {
   border: 2px solid transparent; /* No border by default */
   border-radius: 0.25rem;
   outline: none;
-  font-size: 1.5rem;
+  font-size: max(16px, var(--step-2));
   font-weight: 700;
   text-align: left;
   padding: 0.25rem 0.5rem;
@@ -568,7 +739,7 @@ input[type=file]::file-selector-button:hover {
 /* Caption Text Styles */
 .caption-text {
   color: #555;
-  font-size: 0.9rem;
+  font-size: var(--step--1);
 }
 
 .caption-text-input {
@@ -576,7 +747,7 @@ input[type=file]::file-selector-button:hover {
   border: 2px solid transparent; /* No border by default */
   border-radius: 0.25rem;
   outline: none;
-  font-size: 0.9rem;
+  font-size: max(16px, var(--step--1));
   color: var(--black);
   text-align: left;
   padding: 0.25rem 0.5rem;
@@ -601,6 +772,33 @@ input[type=file]::file-selector-button:hover {
 
 /* Removed complex image overlay styles - simplified design */
 
+/* #lightbox sits above #content in the document, so htmx swapped the lightbox
+   in at the top of the page - tapping a thumbnail far down the grid opened it
+   completely off-screen. As a fixed overlay it is always in view, which is also
+   what makes the backdrop tap-to-close behave the way people expect. */
+#lightbox:not(:empty) {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.85);
+    overscroll-behavior: contain;
+}
+
+#lightbox:not(:empty) > div {
+    width: 100%;
+    max-width: 800px;
+}
+
+body.lightbox-open {
+    overflow: hidden;
+}
+
+/* max-height keeps the lightbox inside the viewport in landscape, where a rigid
+   1/1 aspect-ratio pushed the image and its controls off the bottom. */
 .lightbox-container {
     position: relative;
     max-width: 800px;
@@ -608,6 +806,8 @@ input[type=file]::file-selector-button:hover {
     margin: 0 auto;
     overflow: hidden;
     aspect-ratio: 1 / 1;
+    max-height: 100vh;
+    max-height: 100dvh;
     padding: 1.25rem;
 }
 
@@ -633,8 +833,10 @@ input[type=file]::file-selector-button:hover {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    height: 3.125rem;
-    width: 1.875rem;
+    min-height: var(--tap-min);
+    min-width: var(--tap-min);
+    height: 4rem;
+    width: var(--tap-min);
     background: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
@@ -645,6 +847,8 @@ input[type=file]::file-selector-button:hover {
     align-items: center;
     justify-content: center;
     font-size: 2rem;
+    padding: 0;
+    margin: 0;
 }
 
 .lightbox-nav-button:hover {
@@ -655,8 +859,10 @@ input[type=file]::file-selector-button:hover {
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: var(--tap-min);
+    height: var(--tap-min);
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
     background: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
@@ -665,6 +871,8 @@ input[type=file]::file-selector-button:hover {
     z-index: 3;
     border-radius: 0.25rem;
     transition: background 0.3s;
+    padding: 0;
+    margin: 0;
 }
 
 .lightbox-close-button:hover {
@@ -691,53 +899,44 @@ input[type=file]::file-selector-button:hover {
     padding: 1rem;
     text-align: center;
     z-index: 2;
-    font-size: 1rem;
+    font-size: var(--step--1);
 }
 
-@media (max-width: 768px) {
-  html {
-    font-size: 14px;
+/* Coarse pointers (touch) get guaranteed tap targets regardless of viewport
+   width - a tablet is wide but still finger-driven, so this keys off input type
+   rather than screen size. */
+@media (pointer: coarse) {
+  .navbar li a,
+  button,
+  .submitbtn,
+  .upload-button,
+  input[type="file"],
+  .login-input,
+  .login-input-password,
+  .caption-input {
+    min-height: var(--tap-min);
   }
-  /* 16px+ prevents iOS Safari from auto-zooming into focused inputs.
-     !important beats class-level font-size rules above */
-  input, button, select, textarea {
-    font-size: 16px !important;
+
+  .icon-button {
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
   }
-  .concert-one-regular {
-    font-size: 1.3rem;
-  }
-  .gallery-title {
-    font-size: 1.3rem;
-  }
-  .container {
-    width: 95vw;
+
+  /* Give the delete control room away from the caption it sits beside. */
+  .unified-tile .details {
+    gap: 0.75rem;
   }
 }
 
-@media (max-width: 480px) {
-  .navbar li a {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.9rem;
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  .concert-one-regular {
-    font-size: 1.2rem;
-  }
-  .gallery-title {
-    font-size: 1.2rem;
-  }
-  .unified-tile-caption {
-    font-size: 0.8rem;
-  }
-  button {
-    padding: 0.75rem 1rem;
-  }
-  .lightbox-nav-button {
-    height: 2.5rem;
-    width: 1.5rem;
-    font-size: 1.5rem;
-  }
-  .lightbox-caption {
-    padding: 0.75rem;
-    font-size: 0.9rem;
+  .unified-tile:hover {
+    transform: none;
   }
 }
