@@ -34,6 +34,10 @@ Rocket.toml
 # Env
 .env
 
+# Written by deploy.sh on every deploy
+deploy_info
+deploy.log
+
 # Claude stuff
 .claude.json
 .config/**
