@@ -698,6 +698,11 @@ input[type=file]::file-selector-button:hover {
   html {
     font-size: 14px;
   }
+  /* 16px+ prevents iOS Safari from auto-zooming into focused inputs.
+     !important beats class-level font-size rules above */
+  input, button, select, textarea {
+    font-size: 16px !important;
+  }
   .concert-one-regular {
     font-size: 1.3rem;
   }
