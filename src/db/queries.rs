@@ -122,6 +122,25 @@ pub async fn create_tables(db: &Db) -> Result<(), errors::AppError> {
     create_galleries_table(db).await?;
     create_original_images_table(db).await?;
     create_modified_images_table(db).await?;
+    create_password_reset_table(db).await?;
+    Ok(())
+}
+
+async fn create_password_reset_table(db: &Db) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+            id INTEGER PRIMARY KEY,
+            token TEXT NOT NULL UNIQUE,
+            user_id INTEGER NOT NULL,
+            expires_at INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+        "#,
+    )
+    .execute(&db.0)
+    .await?;
+    info!("Password reset tokens table created");
     Ok(())
 }
 
@@ -401,6 +420,109 @@ pub async fn verify_user(db: &Db, verification_uuid: &str) -> Result<String, sql
     let email: String = row.get(0);
 
     Ok(email)
+}
+
+/// Looks up a verified user by email.
+/// Returns (user_id, email) if the user exists and is verified.
+pub async fn get_verified_user_by_email(
+    db: &Db,
+    email: &str,
+) -> Result<Option<(i64, String)>, sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        SELECT id, email FROM users WHERE email = ?1 AND is_verified = TRUE
+        "#,
+    )
+    .bind(email)
+    .fetch_optional(&db.0)
+    .await?;
+
+    Ok(row.map(|row| (row.get(0), row.get(1))))
+}
+
+pub async fn create_reset_token(
+    db: &Db,
+    user_id: i64,
+    token: &str,
+    expires_at: i64,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES (?1, ?2, ?3)
+        "#,
+    )
+    .bind(token)
+    .bind(user_id)
+    .bind(expires_at)
+    .execute(&db.0)
+    .await?;
+
+    Ok(())
+}
+
+/// Returns (user_id, email, expires_at) for a token, or None if unknown.
+pub async fn get_reset_token(
+    db: &Db,
+    token: &str,
+) -> Result<Option<(i64, String, i64)>, sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        SELECT t.user_id, u.email, t.expires_at
+        FROM password_reset_tokens t
+        INNER JOIN users u ON u.id = t.user_id
+        WHERE t.token = ?1
+        "#,
+    )
+    .bind(token)
+    .fetch_optional(&db.0)
+    .await?;
+
+    Ok(row.map(|row| (row.get(0), row.get(1), row.get(2))))
+}
+
+pub async fn update_user_password(
+    db: &Db,
+    user_id: i64,
+    password_hash: &str,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        UPDATE users SET password = ?1 WHERE id = ?2
+        "#,
+    )
+    .bind(password_hash)
+    .bind(user_id)
+    .execute(&db.0)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn delete_reset_token(db: &Db, token: &str) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        DELETE FROM password_reset_tokens WHERE token = ?1
+        "#,
+    )
+    .bind(token)
+    .execute(&db.0)
+    .await?;
+
+    Ok(())
+}
+
+/// Deletes all sessions belonging to a user (e.g. after a password change).
+pub async fn delete_user_sessions(db: &Db, user_id: i64) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        DELETE FROM sessions WHERE user_id = ?1
+        "#,
+    )
+    .bind(user_id)
+    .execute(&db.0)
+    .await?;
+
+    Ok(())
 }
 
 pub async fn get_galleries(db: &Db) -> Result<Vec<models::GalleryTile>, sqlx::Error> {

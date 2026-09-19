@@ -6,6 +6,9 @@ use log::error;
 
 pub static SESSION_LENGTH: i64 = 60 * 60 * 24 * 7; // 1 week
 pub static VERIFICATION_LINK_TTL_DAYS: i64 = 7;
+pub static RESET_TOKEN_TTL_SECONDS: i64 = 60 * 60; // 1 hour
+pub static RESET_PASSWORD_SUBJECT: &str = "Password reset request";
+pub static RESET_CATEGORY: &str = "password_reset";
 
 pub static IMG_PATH: &str = "./img";
 pub static MAILTRAP_SEND: &str = "https://send.api.mailtrap.io/api/send";

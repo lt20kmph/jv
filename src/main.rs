@@ -6,6 +6,7 @@ mod constants;
 mod db {
     pub mod queries;
 }
+mod email;
 mod errors;
 mod http_utils;
 mod middleware;
@@ -19,6 +20,7 @@ mod routes {
     pub mod js;
     pub mod login;
     pub mod logout;
+    pub mod reset;
     pub mod signup;
 }
 mod tera_utils;
@@ -39,6 +41,7 @@ use routes::index;
 use routes::js;
 use routes::login;
 use routes::logout;
+use routes::reset;
 use routes::signup;
 
 #[allow(clippy::result_large_err)] // Rocket's fairing API requires returning the Rocket on failure
@@ -78,6 +81,10 @@ fn stage() -> AdHoc {
                     login::post,
                     login::get,
                     logout::get,
+                    reset::get,
+                    reset::post,
+                    reset::get_reset,
+                    reset::post_reset,
                     signup::post,
                     signup::get,
                     signup::verify,

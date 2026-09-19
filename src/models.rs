@@ -40,6 +40,17 @@ pub struct CreateGallery<'f> {
     pub name: Option<&'f str>,
 }
 
+#[derive(FromForm)]
+pub struct ForgotPasswordRequest {
+    pub email: String,
+}
+
+#[derive(FromForm)]
+pub struct ResetPasswordRequest<'f> {
+    pub password: &'f str,
+    pub confirm: &'f str,
+}
+
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 pub enum VerificationOutcome {
