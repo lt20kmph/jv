@@ -1,6 +1,4 @@
 use argon2::password_hash;
-use image;
-use reqwest;
 use rocket::http::ContentType;
 use rocket::http::Status;
 use rocket::response::{self, Responder, Response};
@@ -8,7 +6,6 @@ use rocket::Request;
 use rocket_db_pools::sqlx;
 use std::fmt;
 use std::io;
-use tera;
 
 pub struct AppError {
     pub code: u16,

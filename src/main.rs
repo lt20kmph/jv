@@ -8,10 +8,9 @@ mod db {
 }
 mod errors;
 mod middleware;
-mod models {
-    pub mod models;
-}
+mod models;
 mod routes {
+    pub mod about;
     pub mod css;
     pub mod galleries;
     pub mod img;
@@ -25,13 +24,13 @@ mod tera_utils;
 
 use db::queries;
 use db::queries::Db;
-use env_logger;
 use log::error;
 use rocket::fairing::{self, AdHoc};
 use rocket::fs::{relative, FileServer};
 use rocket::{catchers, Build, Rocket};
 use rocket::{launch, routes};
 use rocket_db_pools::Database;
+use routes::about;
 use routes::css;
 use routes::galleries;
 use routes::img;
@@ -41,9 +40,10 @@ use routes::login;
 use routes::logout;
 use routes::signup;
 
+#[allow(clippy::result_large_err)] // Rocket's fairing API requires returning the Rocket on failure
 async fn create_tables(rocket: Rocket<Build>) -> fairing::Result {
     match Db::fetch(&rocket) {
-        Some(db) => match queries::create_tables(&db).await {
+        Some(db) => match queries::create_tables(db).await {
             Ok(_) => Ok(rocket),
             Err(e) => {
                 error!("Failed to initialize SQLx database: {}", e);
@@ -62,6 +62,7 @@ fn stage() -> AdHoc {
             .mount(
                 "/",
                 routes![
+                    about::get,
                     galleries::post,
                     galleries::post_img,
                     galleries::get,
@@ -92,6 +93,6 @@ fn rocket() -> _ {
     env_logger::init();
     rocket::build()
         .attach(stage())
-        .register("/", catchers![catchers::not_authorized, catchers::forbidden])
+        .register("/", catchers![catchers::not_authorized, catchers::forbidden, catchers::not_found])
         .mount("/", FileServer::from(relative!("static")))
 }

@@ -5,6 +5,63 @@ function beforeUploadFormRequest() {
   }
 }
 
+// Lightbox controls
+
+function closeLightbox() {
+  document.getElementById("lightbox").innerHTML = "";
+}
+
+function setupLightboxListeners() {
+  const lightboxTarget = document.getElementById("lightbox");
+  if (!lightboxTarget) return;
+
+  // Click on the backdrop (outside the image) closes the lightbox
+  lightboxTarget.addEventListener("click", (event) => {
+    if (event.target === lightboxTarget) closeLightbox();
+  });
+
+  let touchStartX = null;
+
+  // Swipe left/right navigates to the previous/next image
+  document.addEventListener(
+    "touchstart",
+    (event) => {
+      const touch = event.touches[0];
+      if (
+        touch &&
+        touch.target instanceof Element &&
+        touch.target.closest(".lightbox")
+      ) {
+        touchStartX = touch.clientX;
+      }
+    },
+    { passive: true },
+  );
+
+  document.addEventListener(
+    "touchend",
+    (event) => {
+      if (touchStartX === null) return;
+
+      const deltaX = event.changedTouches[0].clientX - touchStartX;
+      touchStartX = null;
+
+      if (Math.abs(deltaX) < 60) return;
+
+      const button = deltaX < 0
+        ? document.querySelector(".lightbox-next-button")
+        : document.querySelector(".lightbox-prev-button");
+      if (button) button.click();
+    },
+    { passive: true },
+  );
+}
+
+// Escape closes the lightbox
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeLightbox();
+});
+
 function updateGalleryEmptyState() {
   const gallery = document.getElementById("gallery");
   const emptyMessage = gallery.querySelector("p.empty-message");
@@ -28,88 +85,11 @@ function updateGalleryEmptyState() {
   }
 }
 
-// Add event listeners for editable text (same as galleries.js)
-const addEditableTextListeners = () => {
-  // Add click listeners only to editable-text containers that have input elements (Writer role)
-  document.querySelectorAll(".editable-text:not([data-listeners-added])").forEach((editableText) => {
-    const inputElement = editableText.querySelector(
-      ".gallery-title-input, .caption-text-input",
-    );
-    
-    // Only add listeners if input element exists (Writer role)
-    if (inputElement) {
-      // Mark as having listeners to prevent duplicates
-      editableText.setAttribute("data-listeners-added", "true");
-      
-      const handler = (event) => {
-        // Prevent ghost clicks on mobile
-        if (event.type === "touchend") {
-          event.preventDefault();
-        }
-
-        const textElement = editableText.querySelector(
-          ".gallery-title, .caption-text",
-        );
-
-        // Prevent multiple event handlers from firing
-        event.stopPropagation();
-
-        textElement.classList.toggle("hidden");
-        inputElement.classList.toggle("hidden");
-        if (textElement.classList.contains("hidden")) {
-          inputElement.value = textElement.textContent;
-          inputElement.focus();
-        } else {
-          textElement.textContent = inputElement.value;
-        }
-      };
-
-      editableText.addEventListener("click", handler);
-      editableText.addEventListener("touchend", handler);
-    }
-  });
-
-  document
-    .querySelectorAll(".gallery-title-input:not([data-keyup-listener]), .caption-text-input:not([data-keyup-listener])")
-    .forEach((input) => {
-      // Mark as having keyup listener to prevent duplicates
-      input.setAttribute("data-keyup-listener", "true");
-      
-      input.addEventListener("keyup", function (event) {
-        const editableText = input.closest(".editable-text");
-        const textElement = editableText.querySelector(
-          ".gallery-title, .caption-text",
-        );
-
-        if (event.key === "Enter") {
-          textElement.textContent = input.value;
-          input.blur();
-          input.classList.toggle("hidden");
-          textElement.classList.toggle("hidden");
-        }
-      });
-
-      // Add blur event listener to handle clicking outside
-      input.addEventListener("blur", function (event) {
-        const editableText = input.closest(".editable-text");
-        const textElement = editableText.querySelector(
-          ".gallery-title, .caption-text",
-        );
-
-        // Exit edit mode when clicking outside
-        textElement.textContent = input.value;
-        input.classList.add("hidden");
-        textElement.classList.remove("hidden");
-      });
-    });
-
-};
-
-
 // Initialize empty state on page load and set up observer
 document.addEventListener("DOMContentLoaded", function () {
   updateGalleryEmptyState();
   addEditableTextListeners();
+  setupLightboxListeners();
 
   // Set up MutationObserver to watch for changes in the gallery
   const gallery = document.getElementById("gallery");

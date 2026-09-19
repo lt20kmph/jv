@@ -1,4 +1,4 @@
-use crate::models::models::{Session, Role};
+use crate::models::{Session, Role};
 use crate::queries;
 use crate::queries::Db;
 use log::debug;
@@ -43,7 +43,6 @@ impl<'r> FromRequest<'r> for Session {
         debug!("Getting session for user: (user_id: {:?})", user);
 
         let session = Session {
-            session_token,
             user,
         };
 
@@ -67,13 +66,8 @@ pub struct WriterSession {
 }
 
 impl WriterSession {
-    /// Access the underlying session
-    pub fn session(&self) -> &Session {
-        &self.session
-    }
-    
     /// Access the user from the session
-    pub fn user(&self) -> &crate::models::models::User {
+    pub fn user(&self) -> &crate::models::User {
         &self.session.user
     }
 }

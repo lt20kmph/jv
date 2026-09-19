@@ -1,6 +1,7 @@
 <div>
   <div class="lightbox-container">
     <div class="lightbox">
+      <button class="lightbox-close-button" onclick="closeLightbox()" title="Close">✕</button>
       <button class="lightbox-nav-button lightbox-prev-button"
         hx-get="/galleries/{{gallery_id}}/lightbox/{{previous_image_id}}" hx-target="#lightbox">
         ‹</button>
@@ -12,3 +13,4 @@
     </div>
   </div>
 </div>
+

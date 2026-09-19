@@ -40,6 +40,15 @@ pub struct CreateGallery<'f> {
     pub name: Option<&'f str>,
 }
 
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub enum VerificationOutcome {
+    Verified,
+    AlreadyVerified,
+    Expired,
+    Invalid,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
 pub enum Role {
@@ -57,7 +66,6 @@ pub struct User {
 
 #[derive(Debug)]
 pub struct Session {
-    pub session_token: String,
     pub user: User,
 }
 

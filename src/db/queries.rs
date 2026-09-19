@@ -3,7 +3,7 @@ use crate::errors;
 use rocket::futures::TryStreamExt;
 
 use crate::constants;
-use crate::models::models;
+use crate::models;
 use chrono;
 use log::info;
 use rocket_db_pools::Connection;
@@ -195,7 +195,7 @@ pub async fn verify_password(
 ) -> Result<bool, errors::AppError> {
     let row = sqlx::query(
         r#"
-        SELECT password, salt FROM users WHERE email = ?1
+        SELECT password FROM users WHERE email = ?1
         "#,
     )
     .bind(email)
@@ -208,10 +208,8 @@ pub async fn verify_password(
     };
 
     let db_password_hash: String = row.get(0);
-    let db_salt: String = row.get(1);
 
     Ok(pw_utils::verify_password(
-        db_salt,
         &db_password_hash,
         password,
     )?)
@@ -232,7 +230,7 @@ pub async fn get_user_from_session_token(
         WHERE session_token = ?1
         "#,
     )
-    .bind(&session_token)
+    .bind(session_token)
     .fetch_one(&pool.0)
     .await?;
 
@@ -366,35 +364,28 @@ pub async fn create_image(
     })
 }
 
-pub async fn get_gallery_images(db: &Db, gallery_id: i64) -> Vec<models::Image> {
-    let mut images = vec![];
-
-    let mut rows = sqlx::query(
+pub async fn get_user_by_verification(
+    db: &Db,
+    verification_uuid: &str,
+) -> Result<Option<(String, String, bool)>, sqlx::Error> {
+    let row = sqlx::query(
         r#"
-        SELECT
-            modified_images.id,
-            modified_images.path,
-            modified_images.caption
-        FROM original_images
-        JOIN modified_images ON original_images.id = modified_images.original_image_id
-        WHERE original_images.gallery_id = ?1
+        SELECT email, time_created, is_verified
+        FROM users
+        WHERE verification_uuid = ?1
         "#,
     )
-    .bind(gallery_id)
-    .fetch(&db.0);
+    .bind(verification_uuid)
+    .fetch_optional(&db.0)
+    .await?;
 
-    while let Ok(row) = rows.try_next().await {
-        let row = match row {
-            Some(row) => row,
-            None => break,
-        };
-        let id: i64 = row.get(0);
-        let path: String = row.get(1);
-        let caption: String = row.get(2);
-        images.push(models::Image { id, path, original_path: None, caption });
-    }
-
-    images
+    Ok(row.map(|row| {
+        (
+            row.get::<String, _>(0),
+            row.get::<String, _>(1),
+            row.get::<bool, _>(2),
+        )
+    }))
 }
 
 pub async fn verify_user(db: &Db, verification_uuid: &str) -> Result<String, sqlx::Error> {
@@ -570,7 +561,7 @@ pub async fn update_gallery(
 }
 
 pub async fn delete_image(db: &Db, image_id: i64) -> Result<(), sqlx::Error> {
-    let row = sqlx::query(
+    let _row = sqlx::query(
         r#"
         UPDATE modified_images SET status = 'deleted' WHERE id = ?1
         "#,
