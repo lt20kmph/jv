@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Login{% endblock title %}
 {% block body %}
-<form hx-post="/login" hx-trigger="submit" hx-push-url="/">
+<form class="auth-page" hx-post="/login" hx-trigger="submit" hx-push-url="/">
   <div class="container montserrat-body">
     <div>
       <label for="email"><b>Email</b></label>

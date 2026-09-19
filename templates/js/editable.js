@@ -14,10 +14,9 @@ const addEditableTextListeners = () => {
       editableText.setAttribute("data-listeners-added", "true");
 
       const handler = (event) => {
-        // Prevent ghost clicks on mobile
-        if (event.type === "touchend") {
-          event.preventDefault();
-        }
+        // Don't hijack taps on controls that happen to sit inside the tile
+        // (e.g. the delete button) - only the text itself toggles edit mode.
+        if (event.target.closest("button, a")) return;
 
         const textElement = editableText.querySelector(
           ".gallery-title, .caption-text",
@@ -36,8 +35,10 @@ const addEditableTextListeners = () => {
         }
       };
 
+      // A single click listener covers mouse, touch and keyboard activation.
+      // The previous click + touchend pair fired twice on some touch browsers,
+      // toggling edit mode straight back off.
       editableText.addEventListener("click", handler);
-      editableText.addEventListener("touchend", handler);
     }
   });
 

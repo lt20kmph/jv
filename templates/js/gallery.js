@@ -15,6 +15,14 @@ function setupLightboxListeners() {
   const lightboxTarget = document.getElementById("lightbox");
   if (!lightboxTarget) return;
 
+  // Stop the grid behind the overlay from scrolling while it's open.
+  new MutationObserver(() => {
+    document.body.classList.toggle(
+      "lightbox-open",
+      lightboxTarget.children.length > 0,
+    );
+  }).observe(lightboxTarget, { childList: true });
+
   // Click on the backdrop (outside the image) closes the lightbox
   lightboxTarget.addEventListener("click", (event) => {
     if (event.target === lightboxTarget) closeLightbox();
