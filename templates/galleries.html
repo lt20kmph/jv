@@ -11,6 +11,13 @@
     </a>
   </li>
   {% endif %}
+  {% if deploy %}
+  <li style="float:right">
+    <a data-tippy-content="Deployed {{deploy.at_exact}}{% if deploy.sha %} ({{deploy.sha}}){% endif %}" style="font-size: 0.8rem; font-style: normal;">
+      Deployed: {{deploy.at_human}}
+    </a>
+  </li>
+  {% endif %}
   <li style="float:right">
     <a href="/about">About</a>
   </li>

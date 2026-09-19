@@ -11,3 +11,6 @@ rustup run nightly cargo build --release
 
 echo "Restarting..."
 sudo systemctl restart jv.service
+
+echo "Recording deploy info..."
+{ date +%s; git rev-parse --short HEAD; } > deploy_info

@@ -67,6 +67,12 @@ pub enum Role {
     Writer,
 }
 
+impl Role {
+    pub fn is_writer(&self) -> bool {
+        matches!(self, Role::Writer)
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(crate = "rocket::serde")]
 pub struct User {

@@ -1,6 +1,7 @@
 use crate::constants;
 use crate::db::queries;
 use crate::db::queries::Db;
+use crate::deploy_info;
 use crate::errors;
 use crate::middleware::WriterSession;
 use crate::models;
@@ -122,6 +123,9 @@ pub async fn get(
     let mut context = tera::Context::new();
     context.insert("galleries", &galleries);
     context.insert("user", &session.user);
+    if session.user.role.is_writer() {
+        context.insert("deploy", &deploy_info::read());
+    }
 
     let galleries_html = tera_utils::render_template_with_logging("galleries.html", &context)?;
     Ok(content::RawHtml(galleries_html))
@@ -138,6 +142,9 @@ pub async fn get_gallery(
     let mut context = tera::Context::new();
     context.insert("gallery", &gallery);
     context.insert("user", &session.user);
+    if session.user.role.is_writer() {
+        context.insert("deploy", &deploy_info::read());
+    }
 
     let gallery_html = tera_utils::render_template_with_logging("gallery.html", &context)?;
     Ok(content::RawHtml(gallery_html))

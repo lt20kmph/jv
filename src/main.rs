@@ -6,6 +6,7 @@ mod constants;
 mod db {
     pub mod queries;
 }
+mod deploy_info;
 mod email;
 mod errors;
 mod http_utils;
