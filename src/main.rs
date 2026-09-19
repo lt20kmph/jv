@@ -7,6 +7,7 @@ mod db {
     pub mod queries;
 }
 mod errors;
+mod http_utils;
 mod middleware;
 mod models;
 mod routes {
